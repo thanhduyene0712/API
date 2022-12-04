@@ -19,7 +19,7 @@ namespace UPOD.SERVICES.Services
         Task<ObjectModelResponse> CreateTechnician(TechnicianRequest model);
         Task<ObjectModelResponse> UpdateTechnician(Guid id, TechnicianUpdateRequest model);
         Task<ObjectModelResponse> DisableTechnician(Guid id);
-        Task<ResponseModel<DevicesOfRequestResponse>> CreateTicket(Guid id, ListTicketRequest model);
+        Task<ResponseModel<DevicesOfRequestResponse>> CreateTicket(Guid id, Guid tech_id, ListTicketRequest model);
         Task<ResponseModel<RequestResponse>> GetListRequestsOfTechnician(PaginationRequest model, Guid id, FilterStatusRequest value);
         Task<ResponseModel<DevicesOfRequestResponse>> GetDevicesByRequest(PaginationRequest model, Guid id);
         Task<ObjectModelResponse> ResolvingRequest(Guid id, Guid tech_id);
@@ -40,8 +40,8 @@ namespace UPOD.SERVICES.Services
         }
         public async Task<ResponseModel<DevicesOfRequestResponse>> GetDevicesByRequest(PaginationRequest model, Guid id)
         {
-            var total = await _context.Tickets.Where(a => a.RequestId.Equals(id) && a.IsDelete == false).ToListAsync();
-            var device_of_request = await _context.Tickets.Where(a => a.RequestId.Equals(id) && a.IsDelete == false).Select(a => new DevicesOfRequestResponse
+            var total = await _context.RequestDevices.Where(a => a.RequestId.Equals(id) && a.IsDelete == false).ToListAsync();
+            var device_of_request = await _context.RequestDevices.Where(a => a.RequestId.Equals(id) && a.IsDelete == false).Select(a => new DevicesOfRequestResponse
             {
                 ticket_id = a.Id,
                 device_id = a.Device!.Id,
@@ -50,7 +50,7 @@ namespace UPOD.SERVICES.Services
                 solution = a.Solution,
                 description = a.Description,
                 create_date = a.CreateDate,
-                img = _context.Images.Where(x => x.CurrentObject_Id.Equals(a.Id) && x.ObjectName!.Equals(ObjectName.TI.ToString())).Select(a => a.Link).ToList()!,
+                img = _context.Images.Where(x => x.CurrentObject_Id.Equals(a.Id) && x.ObjectName!.Equals(ObjectName.RE.ToString())).Select(a => a.Link).ToList()!,
 
             }).OrderByDescending(x => x.code).Skip((model.PageNumber - 1) * model.PageSize).Take(model.PageSize).ToListAsync();
             return new ResponseModel<DevicesOfRequestResponse>(device_of_request)
@@ -746,98 +746,107 @@ namespace UPOD.SERVICES.Services
             return CodeHelper.StringToInt(technician!.Code!);
         }
 
-        public async Task<ResponseModel<DevicesOfRequestResponse>> CreateTicket(Guid id, ListTicketRequest model)
+        public async Task<ResponseModel<DevicesOfRequestResponse>> CreateTicket(Guid id, Guid tech_id, ListTicketRequest model)
         {
 
             var request = await _context.Requests.Where(a => a.Id.Equals(id) && a.IsDelete == false).FirstOrDefaultAsync();
             var technician = await _context.Technicians.Where(x => x.Id.Equals(request!.CurrentTechnicianId)).FirstOrDefaultAsync();
-            
+
             var list = new List<DevicesOfRequestResponse>();
             var message = "blank";
             var status = 500;
-            if (model.ticket.Count <= 0)
+            if (request!.CurrentTechnicianId == tech_id)
             {
-                message = "Device must not be empty!";
-                status = 400;
+
+                if (model.ticket.Count <= 0)
+                {
+                    message = "Device must not be empty!";
+                    status = 400;
+                }
+                else
+                {
+                    technician!.IsBusy = false;
+                    request!.UpdateDate = DateTime.UtcNow.AddHours(7);
+                    request!.RequestStatus = ProcessStatus.RESOLVED.ToString();
+                    request.EndTime = DateTime.UtcNow.AddHours(7);
+                    message = "Successfully";
+                    status = 200;
+                    foreach (var item in model.ticket)
+                    {
+                        var device_id = Guid.NewGuid();
+                        while (true)
+                        {
+                            var ticket_id = await _context.RequestDevices.Where(x => x.Id.Equals(device_id)).FirstOrDefaultAsync();
+                            if (ticket_id == null)
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                device_id = Guid.NewGuid();
+                            }
+                        }
+                        var ticket = new RequestDevice
+                        {
+                            Id = device_id,
+                            RequestId = request.Id,
+                            DeviceId = item.device_id,
+                            Description = item.description,
+                            Solution = item.solution,
+                            IsDelete = false,
+                            CreateBy = technician!.Id,
+                            CreateDate = DateTime.UtcNow.AddHours(7),
+                            UpdateDate = DateTime.UtcNow.AddHours(7)
+                        };
+
+                        if (item.img!.Count > 0)
+                        {
+                            foreach (var item1 in item.img!)
+                            {
+                                var img_id = Guid.NewGuid();
+                                while (true)
+                                {
+                                    var img_dup = await _context.Images.Where(x => x.Id.Equals(img_id)).FirstOrDefaultAsync();
+                                    if (img_dup == null)
+                                    {
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        img_id = Guid.NewGuid();
+                                    }
+                                }
+
+                                var imgTicket = new Image
+                                {
+                                    Id = img_id,
+                                    Link = item1,
+                                    CurrentObject_Id = ticket.Id,
+                                    ObjectName = ObjectName.RE.ToString(),
+                                };
+                                await _context.Images.AddAsync(imgTicket);
+                            }
+                        }
+                        await _context.RequestDevices.AddAsync(ticket);
+                        await _context.SaveChangesAsync();
+                        list.Add(new DevicesOfRequestResponse
+                        {
+                            ticket_id = ticket.Id,
+                            device_id = ticket.DeviceId,
+                            code = _context.Devices.Where(a => a.Id.Equals(ticket.DeviceId)).Select(a => a.Code).FirstOrDefault(),
+                            name = _context.Devices.Where(a => a.Id.Equals(ticket.DeviceId)).Select(a => a.DeviceName).FirstOrDefault(),
+                            solution = ticket.Solution,
+                            description = ticket.Description,
+                            create_date = ticket.CreateDate,
+                            img = _context.Images.Where(a => a.CurrentObject_Id.Equals(ticket.Id) && a.ObjectName!.Equals(ObjectName.RE.ToString())).Select(x => x.Link).ToList()!,
+                        });
+                    }
+                }
             }
             else
             {
-                technician!.IsBusy = false;
-                request!.UpdateDate = DateTime.UtcNow.AddHours(7);
-                request!.RequestStatus = ProcessStatus.RESOLVED.ToString();
-                request.EndTime = DateTime.UtcNow.AddHours(7);
-                message = "Successfully";
-                status = 200;
-                foreach (var item in model.ticket)
-                {
-                    var device_id = Guid.NewGuid();
-                    while (true)
-                    {
-                        var ticket_id = await _context.Tickets.Where(x => x.Id.Equals(device_id)).FirstOrDefaultAsync();
-                        if (ticket_id == null)
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            device_id = Guid.NewGuid();
-                        }
-                    }
-                    var ticket = new Ticket
-                    {
-                        Id = device_id,
-                        RequestId = request.Id,
-                        DeviceId = item.device_id,
-                        Description = item.description,
-                        Solution = item.solution,
-                        IsDelete = false,
-                        CreateBy = technician!.Id,
-                        CreateDate = DateTime.UtcNow.AddHours(7),
-                        UpdateDate = DateTime.UtcNow.AddHours(7)
-                    };
-
-                    if (item.img!.Count > 0)
-                    {
-                        foreach (var item1 in item.img!)
-                        {
-                            var img_id = Guid.NewGuid();
-                            while (true)
-                            {
-                                var img_dup = await _context.Images.Where(x => x.Id.Equals(img_id)).FirstOrDefaultAsync();
-                                if (img_dup == null)
-                                {
-                                    break;
-                                }
-                                else
-                                {
-                                    img_id = Guid.NewGuid();
-                                }
-                            }
-
-                            var imgTicket = new Image
-                            {
-                                Id = img_id,
-                                Link = item1,
-                                CurrentObject_Id = ticket.Id,
-                                ObjectName = ObjectName.TI.ToString(),
-                            };
-                            await _context.Images.AddAsync(imgTicket);
-                        }
-                    }
-                    await _context.Tickets.AddAsync(ticket);
-                    await _context.SaveChangesAsync();
-                    list.Add(new DevicesOfRequestResponse
-                    {
-                        ticket_id = ticket.Id,
-                        device_id = ticket.DeviceId,
-                        code = _context.Devices.Where(a => a.Id.Equals(ticket.DeviceId)).Select(a => a.Code).FirstOrDefault(),
-                        name = _context.Devices.Where(a => a.Id.Equals(ticket.DeviceId)).Select(a => a.DeviceName).FirstOrDefault(),
-                        solution = ticket.Solution,
-                        description = ticket.Description,
-                        create_date = ticket.CreateDate,
-                        img = _context.Images.Where(a => a.CurrentObject_Id.Equals(ticket.Id) && a.ObjectName!.Equals(ObjectName.TI.ToString())).Select(x => x.Link).ToList()!,
-                    });
-                }
+                message = "The technician does not own the request";
+                status = 400;
             }
             return new ResponseModel<DevicesOfRequestResponse>(list)
             {
@@ -851,7 +860,7 @@ namespace UPOD.SERVICES.Services
         public async Task<ObjectModelResponse> UpdateDeviceTicket(Guid id, ListTicketRequest model)
         {
 
-            var devices = await _context.Tickets.Where(a => a.RequestId.Equals(id) && a.IsDelete == false).ToListAsync();
+            var devices = await _context.RequestDevices.Where(a => a.RequestId.Equals(id) && a.IsDelete == false).ToListAsync();
             var request = await _context.Requests.Where(a => a.Id.Equals(id) && a.IsDelete == false).FirstOrDefaultAsync();
             var technician = await _context.Technicians.Where(x => x.Id.Equals(request!.CurrentTechnicianId)).FirstOrDefaultAsync();
             technician!.IsBusy = false;
@@ -871,7 +880,7 @@ namespace UPOD.SERVICES.Services
                 status = 201;
                 foreach (var device in devices)
                 {
-                    _context.Tickets.Remove(device);
+                    _context.RequestDevices.Remove(device);
                     var imgs = await _context.Images.Where(a => a.CurrentObject_Id.Equals(device.Id)).ToListAsync();
                     foreach (var item in imgs)
                     {
@@ -883,7 +892,7 @@ namespace UPOD.SERVICES.Services
                     var device_id = Guid.NewGuid();
                     while (true)
                     {
-                        var ticket_id = await _context.Tickets.Where(x => x.Id.Equals(device_id)).FirstOrDefaultAsync();
+                        var ticket_id = await _context.RequestDevices.Where(x => x.Id.Equals(device_id)).FirstOrDefaultAsync();
                         if (ticket_id == null)
                         {
                             break;
@@ -893,7 +902,7 @@ namespace UPOD.SERVICES.Services
                             device_id = Guid.NewGuid();
                         }
                     }
-                    var ticket = new Ticket
+                    var ticket = new RequestDevice
                     {
                         Id = device_id,
                         RequestId = request!.Id,
@@ -905,7 +914,7 @@ namespace UPOD.SERVICES.Services
                         CreateDate = DateTime.UtcNow.AddHours(7),
                         UpdateDate = DateTime.UtcNow.AddHours(7)
                     };
-                    await _context.Tickets.AddAsync(ticket);
+                    await _context.RequestDevices.AddAsync(ticket);
 
                     if (item.img!.Count > 0)
                     {
@@ -914,7 +923,7 @@ namespace UPOD.SERVICES.Services
                             var img_id = Guid.NewGuid();
                             while (true)
                             {
-                                var img_dup = await _context.Images.Where(x => x.Id.Equals(img_id) && x.ObjectName.Equals(ObjectName.TI.ToString())).FirstOrDefaultAsync();
+                                var img_dup = await _context.Images.Where(x => x.Id.Equals(img_id) && x.ObjectName.Equals(ObjectName.RE.ToString())).FirstOrDefaultAsync();
                                 if (img_dup == null)
                                 {
                                     break;
@@ -929,7 +938,7 @@ namespace UPOD.SERVICES.Services
                                 Id = img_id,
                                 Link = item1,
                                 CurrentObject_Id = ticket.Id,
-                                ObjectName = ObjectName.TI.ToString(),
+                                ObjectName = ObjectName.RE.ToString(),
                             };
                             await _context.Images.AddAsync(imgTicket);
 
@@ -1222,11 +1231,11 @@ namespace UPOD.SERVICES.Services
         }
         public async Task<ObjectModelResponse> DisableDeviceOfTicket(Guid id)
         {
-            var ticket = await _context.Tickets.Where(x => x.Id.Equals(id)).FirstOrDefaultAsync();
+            var ticket = await _context.RequestDevices.Where(x => x.Id.Equals(id)).FirstOrDefaultAsync();
             ticket!.IsDelete = true;
             ticket.UpdateDate = DateTime.UtcNow.AddHours(7);
             var data = new TicketViewResponse();
-            _context.Tickets.Update(ticket);
+            _context.RequestDevices.Update(ticket);
             var rs = await _context.SaveChangesAsync();
             if (rs > 0)
             {
@@ -1246,7 +1255,7 @@ namespace UPOD.SERVICES.Services
                 Type = "Device"
             };
         }
-    
+
         public async Task<ObjectModelResponse> RejectRequest(Guid id, Guid tech_id)
         {
             var request = await _context.Requests.Where(x => x.Id.Equals(id) && x.IsDelete == false).FirstOrDefaultAsync();
@@ -1322,7 +1331,7 @@ namespace UPOD.SERVICES.Services
                     }
                 }
                 technicians.OrderBy(a => a.number_of_requests).Except(currentTechnician).ToList();
-                if(technicians.Count > 0)
+                if (technicians.Count > 0)
                 {
                     request!.UpdateDate = DateTime.UtcNow.AddHours(7);
                     request!.StartTime = DateTime.UtcNow.AddHours(7);
@@ -1392,7 +1401,7 @@ namespace UPOD.SERVICES.Services
             }
             else
             {
-                message = "Error";
+                message = "The technician does not own the request";
                 status = 400;
             }
 
@@ -1406,7 +1415,7 @@ namespace UPOD.SERVICES.Services
         }
         public async Task<ResponseModel<Technician>> ResetBreachTechnician()
         {
-            var technicians = await _context.Technicians.Where(a=>a.IsDelete == false).ToListAsync();
+            var technicians = await _context.Technicians.Where(a => a.IsDelete == false).ToListAsync();
             foreach (var item in technicians)
             {
                 item!.Breach = 0;

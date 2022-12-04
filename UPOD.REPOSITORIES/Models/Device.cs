@@ -7,7 +7,7 @@ namespace UPOD.REPOSITORIES.Models
     {
         public Device()
         {
-            Tickets = new HashSet<Ticket>();
+            RequestDevices = new HashSet<RequestDevice>();
         }
 
         public Guid Id { get; set; }
@@ -26,6 +26,6 @@ namespace UPOD.REPOSITORIES.Models
 
         public virtual Agency? Agency { get; set; }
         public virtual DeviceType? DeviceType { get; set; }
-        public virtual ICollection<Ticket> Tickets { get; set; }
+        public virtual ICollection<RequestDevice> RequestDevices { get; set; }
     }
 }

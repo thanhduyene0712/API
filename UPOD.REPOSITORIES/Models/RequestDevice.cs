@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace UPOD.REPOSITORIES.Models
 {
-    public partial class Ticket
+    public partial class RequestDevice
     {
         public Guid Id { get; set; }
         public Guid? RequestId { get; set; }

@@ -33,7 +33,7 @@ namespace UPOD.API.Controllers
                 AuthTokenAsyncFactory = () => Task.FromResult(a.FirebaseToken),
                 ThrowOnCancel = true
             })
-            .Child(id + "image.png")
+            .Child(id + "image.docx")
             .PutAsync(fileUpload, cancellation.Token);
             return Ok(await task);
         }

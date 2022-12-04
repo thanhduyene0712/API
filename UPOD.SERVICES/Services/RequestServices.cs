@@ -57,7 +57,7 @@ namespace UPOD.SERVICES.Services
         }
         public async Task<ObjectModelResponse> GetTicketDetails(Guid id)
         {
-            var ticket = await _context.Tickets.Where(a => a.Id.Equals(id) && a.IsDelete == false).Select(a => new TicketResponse
+            var ticket = await _context.RequestDevices.Where(a => a.Id.Equals(id) && a.IsDelete == false).Select(a => new TicketResponse
             {
                 id = a.Id,
                 create_by = _context.Technicians.Where(x => x.Id.Equals(a.CreateBy) && a.IsDelete == false).Select(a => a.TechnicianName).FirstOrDefault(),
@@ -68,7 +68,7 @@ namespace UPOD.SERVICES.Services
                 device_name = _context.Devices.Where(x => x.Id.Equals(a.DeviceId) && a.IsDelete == false).Select(a => a.DeviceName).FirstOrDefault(),
                 is_delete = a.IsDelete,
                 request_id = a.RequestId,
-                img = _context.Images.Where(x => x.CurrentObject_Id.Equals(a.Id) && x.ObjectName!.Equals(ObjectName.TI.ToString())).Select(x => x.Link).ToList()!,
+                img = _context.Images.Where(x => x.CurrentObject_Id.Equals(a.Id) && x.ObjectName!.Equals(ObjectName.RE.ToString())).Select(x => x.Link).ToList()!,
             }).FirstOrDefaultAsync();
 
             return new ObjectModelResponse(ticket!)

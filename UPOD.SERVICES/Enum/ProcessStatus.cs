@@ -39,7 +39,6 @@ namespace UPOD.SERVICES.Enum
     public enum ObjectName
     {
         DE, //Device
-        TI, //Ticket
         TE, //Technician
         CU, //Customer
         SE, //Service

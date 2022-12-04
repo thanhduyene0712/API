@@ -99,11 +99,11 @@ namespace UPOD.API.Controllers
 
         [HttpPost]
         [Route("create_ticket_by_id_request")]
-        public async Task<ActionResult<ResponseModel<DevicesOfRequestResponse>>> CreateTicket(Guid id, ListTicketRequest model)
+        public async Task<ActionResult<ResponseModel<DevicesOfRequestResponse>>> CreateTicket(Guid id, Guid tech_id, ListTicketRequest model)
         {
             try
             {
-                return await _technician_sv.CreateTicket(id, model);
+                return await _technician_sv.CreateTicket(id, tech_id, model);
             }
             catch (Exception ex)
             {

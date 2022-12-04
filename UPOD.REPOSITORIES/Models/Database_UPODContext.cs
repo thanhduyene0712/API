@@ -35,7 +35,7 @@ namespace UPOD.REPOSITORIES.Models
         public virtual DbSet<Service> Services { get; set; } = null!;
         public virtual DbSet<Skill> Skills { get; set; } = null!;
         public virtual DbSet<Technician> Technicians { get; set; } = null!;
-        public virtual DbSet<Ticket> Tickets { get; set; } = null!;
+        public virtual DbSet<RequestDevice> RequestDevices { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -541,9 +541,9 @@ namespace UPOD.REPOSITORIES.Models
                     .HasConstraintName("ITSupporterDepartment");
             });
 
-            modelBuilder.Entity<Ticket>(entity =>
+            modelBuilder.Entity<RequestDevice>(entity =>
             {
-                entity.ToTable("Ticket");
+                entity.ToTable("RequestDevice");
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
@@ -554,12 +554,12 @@ namespace UPOD.REPOSITORIES.Models
                 entity.Property(e => e.UpdateDate).HasColumnType("datetime");
 
                 entity.HasOne(d => d.Device)
-                    .WithMany(p => p.Tickets)
+                    .WithMany(p => p.RequestDevices)
                     .HasForeignKey(d => d.DeviceId)
                     .HasConstraintName("TicketDevice");
 
                 entity.HasOne(d => d.Request)
-                    .WithMany(p => p.Tickets)
+                    .WithMany(p => p.RequestDevices)
                     .HasForeignKey(d => d.RequestId)
                     .HasConstraintName("FK_Ticket_Request");
             });
