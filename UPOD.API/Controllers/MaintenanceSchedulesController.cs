@@ -48,7 +48,7 @@ namespace UPOD.API.Controllers
                 var listMaintenanceSchedule = await _maintenanceSchedule_sv.SetMaintenanceSchedulesNotify();
                 foreach (var item in listMaintenanceSchedule)
                 {
-                   await _notification_Sv.createNotification(new Notification
+                    await _notification_Sv.createNotification(new Notification
                     {
                         isRead = false,
                         CurrentObject_Id = item.Id,
@@ -59,8 +59,8 @@ namespace UPOD.API.Controllers
                     await _notifyHub.Clients.All.SendAsync("NotifyMessage", item.TechnicianId);
                 }
                 await _request_Sv.SetClosedRequest();
+                await _maintenanceSchedule_sv.SetMaintenanceSchedulesNotifyWarning();
                 await _maintenanceSchedule_sv.SetMaintenanceSchedulesNotifyMissing();
-                await _maintenanceSchedule_sv.SetMaintenanceSchedulesMaintaining();
                 await _contract_sv.SetContractNotify();
                 await _maintenanceReport_sv.SetMaintenanceReportStatus();
                 await _maintenanceReport_sv.SetMaintenanceReportStatusProcessing();

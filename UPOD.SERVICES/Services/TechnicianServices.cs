@@ -161,7 +161,7 @@ namespace UPOD.SERVICES.Services
         }
         public async Task<ObjectModelResponse> ConfirmRequest(Guid id)
         {
-            var request = await _context.Requests.Where(a => a.Id.Equals(id) && a.IsDelete == false && a.RequestStatus!.Equals("EDITING")).FirstOrDefaultAsync();
+            var request = await _context.Requests.Where(a => a.Id.Equals(id) && a.IsDelete == false).FirstOrDefaultAsync();
             var technician = await _context.Technicians.Where(x => x.Id.Equals(request!.CurrentTechnicianId)).FirstOrDefaultAsync();
             technician!.IsBusy = false;
             request!.RequestStatus = ProcessStatus.RESOLVED.ToString();
@@ -1104,49 +1104,40 @@ namespace UPOD.SERVICES.Services
             var technician_default = await _context.Agencies.Where(a => a.TechnicianId.Equals(id)).ToListAsync();
             var message = "Susscessfull";
             var status = 201;
-            var technician_request = await _context.Requests.Where(a => a.CurrentTechnicianId.Equals(id) && a.RequestStatus!.Equals("EDITING")).ToListAsync();
-            if (technician_request.Count > 0)
+            var technician_agency = await _context.Requests.Where(a => a.CurrentTechnicianId.Equals(id)).ToListAsync();
+            foreach (var item in technician_agency)
             {
-                foreach (var item in technician_request)
+                status = 201;
+                if (item.RequestStatus!.Equals("PREPARING") || item.RequestStatus!.Equals("RESOLVING"))
                 {
-                    technician!.IsDelete = false;
-                    message = "You can't delete this technician";
-                    _context.Requests.Update(item);
-                    status = 400;
+                    item.CurrentTechnicianId = null;
+                    item.RequestStatus = ProcessStatus.PENDING.ToString();
+                    item.UpdateDate = DateTime.UtcNow.AddHours(7);
+                }
+
+            }
+            if (technician_default.Count > 0)
+            {
+                foreach (var item in technician_default)
+                {
+                    item.TechnicianId = null;
                 }
             }
-            else
+            var skill = await _context.Skills.Where(a => a.TechnicianId.Equals(id) && a.IsDelete == false).ToListAsync();
+            if (skill.Count > 0)
             {
-                var technician_agency = await _context.Requests.Where(a => a.CurrentTechnicianId.Equals(id) && a.RequestStatus != "EDITING").ToListAsync();
-                foreach (var item in technician_agency)
+                foreach (var item in skill)
                 {
-                    status = 201;
-                    if (item.RequestStatus!.Equals("PREPARING") || item.RequestStatus!.Equals("RESOLVING"))
-                    {
-                        item.CurrentTechnicianId = null;
-                        item.RequestStatus = ProcessStatus.PENDING.ToString();
-                        item.UpdateDate = DateTime.UtcNow.AddHours(7);
-                        _context.Requests.Update(item);
-                        foreach (var item1 in technician_default)
-                        {
-                            item1.TechnicianId = null;
-                            _context.Agencies.Update(item1);
-                        }
-                    }
-                    else
-                    {
-                        foreach (var item1 in technician_default)
-                        {
-                            item1.TechnicianId = null;
-                            _context.Agencies.Update(item1);
-                        }
-                    }
+                    item.IsDelete = true;
                 }
             }
             var maintain_techs = await _context.MaintenanceSchedules.Where(a => a.TechnicianId.Equals(id) && a.IsDelete == false).ToListAsync();
-            foreach (var item in maintain_techs)
+            if (maintain_techs.Count > 0)
             {
-                item.TechnicianId = null;
+                foreach (var item in maintain_techs)
+                {
+                    item.TechnicianId = null;
+                }
             }
             var account = await _context.Accounts.Where(a => a.IsDelete == false && a.Id.Equals(technician.AccountId)).FirstOrDefaultAsync();
             if (account != null)
@@ -1254,8 +1245,7 @@ namespace UPOD.SERVICES.Services
                 Status = 201,
                 Type = "Device"
             };
-        }
-
+        }       
         public async Task<ObjectModelResponse> RejectRequest(Guid id, Guid tech_id)
         {
             var request = await _context.Requests.Where(x => x.Id.Equals(id) && x.IsDelete == false).FirstOrDefaultAsync();
@@ -1372,7 +1362,7 @@ namespace UPOD.SERVICES.Services
             var message = "blank";
             var status = 500;
             var data = new ResolvingRequestResponse();
-            var request_resolving = await _context.Requests.Where(a => a.CurrentTechnicianId.Equals(tech_id) && (a.RequestStatus!.Equals("RESOLVING") || a.RequestStatus!.Equals("EDITING"))).FirstOrDefaultAsync();
+            var request_resolving = await _context.Requests.Where(a => a.CurrentTechnicianId.Equals(tech_id) && (a.RequestStatus!.Equals("RESOLVING"))).FirstOrDefaultAsync();
             var maintain = await _context.MaintenanceSchedules.Where(a => a.TechnicianId.Equals(tech_id) && a.Status!.Equals("MAINTAINING") && a.IsDelete == false).FirstOrDefaultAsync();
             if (request_resolving != null || maintain != null)
             {

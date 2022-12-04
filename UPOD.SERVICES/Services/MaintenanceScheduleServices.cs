@@ -15,12 +15,13 @@ namespace UPOD.SERVICES.Services
         Task<ResponseModel<MaintenanceScheduleResponse>> GetListMaintenanceSchedulesTechnician(PaginationRequest model, Guid id, FilterStatusRequest value);
         Task<ResponseModel<MaintenanceScheduleResponse>> GetListMaintenanceSchedulesAgency(PaginationRequest model, Guid id, FilterStatusRequest value);
         Task<ObjectModelResponse> UpdateMaintenanceSchedule(Guid id, MaintenanceScheduleRequest model);
+        Task<ObjectModelResponse> AcceptMaintenanceSchedule(Guid id, Guid tech_id);
         Task<ObjectModelResponse> MaintainingSchedule(Guid id, Guid tech_id);
         Task<ObjectModelResponse> DisableMaintenanceSchedule(Guid id);
         Task<ObjectModelResponse> MaintenanceScheduleDetails(Guid id);
         Task<List<MaintenanceSchedule>> SetMaintenanceSchedulesNotify();
+        Task SetMaintenanceSchedulesNotifyWarning();
         Task SetMaintenanceSchedulesNotifyMissing();
-        Task SetMaintenanceSchedulesMaintaining();
     }
 
     public class MaintenanceScheduleServices : IMaintenanceScheduleService
@@ -30,6 +31,75 @@ namespace UPOD.SERVICES.Services
         {
             _context = context;
         }
+        public async Task<ObjectModelResponse> AcceptMaintenanceSchedule(Guid id, Guid tech_id)
+        {
+            var maintenanceSchedule = await _context.MaintenanceSchedules.Where(a => a.Id.Equals(id) && a.IsDelete == false).FirstOrDefaultAsync();
+            var technician = await _context.Technicians.Where(a => a.Id.Equals(maintenanceSchedule!.TechnicianId) && a.IsDelete == false).FirstOrDefaultAsync();
+            var data = new MaintenanceScheduleResponse();
+            var message = "blank";
+            var status = 500;
+            var request = await _context.Requests.Where(a => a.CurrentTechnicianId.Equals(tech_id) && (a.RequestStatus!.Equals("RESOLVING"))).FirstOrDefaultAsync();
+            var maintain = await _context.MaintenanceSchedules.Where(a => a.IsDelete == false && a.TechnicianId.Equals(tech_id) && a.Status!.Equals("MAINTAINING")).FirstOrDefaultAsync();
+            if (request != null || maintain != null)
+            {
+                message = "You have a request or maintenance schedule that needs to solve";
+                status = 400;
+            }
+            else if (maintenanceSchedule!.TechnicianId.Equals(tech_id))
+            {
+                message = "Successfully";
+                status = 200;
+                technician!.IsBusy = true;
+                maintenanceSchedule!.Status = ScheduleStatus.PREPARING.ToString();
+                maintenanceSchedule!.UpdateDate = DateTime.UtcNow.AddHours(7);
+                var rs = await _context.SaveChangesAsync();
+                if (rs > 0)
+                {
+                    data = new MaintenanceScheduleResponse
+                    {
+                        id = maintenanceSchedule.Id,
+                        code = maintenanceSchedule.Code,
+                        name = maintenanceSchedule.Name,
+                        description = maintenanceSchedule.Description,
+                        is_delete = maintenanceSchedule.IsDelete,
+                        create_date = maintenanceSchedule.CreateDate,
+                        update_date = maintenanceSchedule.UpdateDate,
+                        maintain_time = maintenanceSchedule.MaintainTime,
+                        status = maintenanceSchedule.Status,
+                        start_time = maintenanceSchedule.StartDate,
+                        end_time = maintenanceSchedule.EndDate,
+                        technician = new TechnicianViewResponse
+                        {
+                            id = _context.Technicians.Where(x => x.Id.Equals(maintenanceSchedule.TechnicianId)).Select(a => a.Id).FirstOrDefault(),
+                            phone = _context.Technicians.Where(x => x.Id.Equals(maintenanceSchedule.TechnicianId)).Select(a => a.Telephone).FirstOrDefault(),
+                            email = _context.Technicians.Where(x => x.Id.Equals(maintenanceSchedule.TechnicianId)).Select(a => a.Email).FirstOrDefault(),
+                            code = _context.Technicians.Where(x => x.Id.Equals(maintenanceSchedule.TechnicianId)).Select(a => a.Code).FirstOrDefault(),
+                            tech_name = _context.Technicians.Where(x => x.Id.Equals(maintenanceSchedule.TechnicianId)).Select(a => a.TechnicianName).FirstOrDefault(),
+                        },
+                        agency = new AgencyViewResponse
+                        {
+                            id = maintenanceSchedule.AgencyId,
+                            code = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Code).FirstOrDefault(),
+                            agency_name = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.AgencyName).FirstOrDefault(),
+                            address = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Address).FirstOrDefault(),
+                            phone = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Telephone).FirstOrDefault()
+                        }
+                    };
+                }
+            }
+            else
+            {
+                message = "The technician does not own the maintenance schedule";
+                status = 400;
+            }
+
+            return new ObjectModelResponse(data)
+            {
+                Status = status,
+                Message = message,
+                Type = "MaintenanceSchedule"
+            };
+        }
         public async Task<ObjectModelResponse> MaintainingSchedule(Guid id, Guid tech_id)
         {
             var maintenanceSchedule = await _context.MaintenanceSchedules.Where(a => a.Id.Equals(id) && a.IsDelete == false).FirstOrDefaultAsync();
@@ -38,7 +108,7 @@ namespace UPOD.SERVICES.Services
             var data = new MaintenanceScheduleResponse();
             var message = "blank";
             var status = 500;
-            var request = await _context.Requests.Where(a => a.CurrentTechnicianId.Equals(tech_id) && (a.RequestStatus!.Equals("RESOLVING") || a.RequestStatus!.Equals("EDITING"))).FirstOrDefaultAsync();
+            var request = await _context.Requests.Where(a => a.CurrentTechnicianId.Equals(tech_id) && (a.RequestStatus!.Equals("RESOLVING"))).FirstOrDefaultAsync();
             var maintain = await _context.MaintenanceSchedules.Where(a => a.IsDelete == false && a.TechnicianId.Equals(tech_id) && a.Status!.Equals("MAINTAINING")).FirstOrDefaultAsync();
             if (request != null || maintain != null)
             {
@@ -90,7 +160,7 @@ namespace UPOD.SERVICES.Services
             }
             else
             {
-                message = "Error";
+                message = "The technician does not own the maintenance schedule";
                 status = 400;
             }
 
@@ -151,7 +221,7 @@ namespace UPOD.SERVICES.Services
         }
         public async Task<List<MaintenanceSchedule>> SetMaintenanceSchedulesNotify()
         {
-            var todaySchedules = await _context.MaintenanceSchedules.Where(a => (a.MaintainTime!.Value.Date >= DateTime.UtcNow.AddHours(7).Date && a.MaintainTime!.Value.Date <= DateTime.UtcNow.AddHours(7).AddDays(1).Date) && a.IsDelete == false && a!.Status.Equals("SCHEDULED")).ToListAsync();
+            var todaySchedules = await _context.MaintenanceSchedules.Where(a => a.MaintainTime!.Value.Date == DateTime.UtcNow.AddHours(7).AddDays(2).Date && a.IsDelete == false && a.Status.Equals("SCHEDULED")).ToListAsync();
             foreach (var item in todaySchedules)
             {
                 item.UpdateDate = DateTime.UtcNow.AddHours(7);
@@ -161,14 +231,35 @@ namespace UPOD.SERVICES.Services
 
             return todaySchedules;
         }
-        public async Task SetMaintenanceSchedulesNotifyMissing()
+        public async Task SetMaintenanceSchedulesNotifyWarning()
         {
             var maintainSchedule = await _context.MaintenanceSchedules.Where(a => a.IsDelete == false && a.Status!.Equals("NOTIFIED")).ToListAsync();
             foreach (var item in maintainSchedule)
             {
-                var missingDate = DateTime.UtcNow.AddHours(7) - item.MaintainTime;
-                var date = missingDate!.Value.Days;
-                if (date >= 5)
+                if (item.MaintainTime!.Value.Date == DateTime.UtcNow.AddHours(7).AddDays(1).Date)
+                {
+                    item.UpdateDate = DateTime.UtcNow.AddHours(7);
+                    item.Status = ScheduleStatus.WARNING.ToString();
+                    var technician = await _context.Technicians.Where(a => a.Id.Equals(item.TechnicianId)).FirstOrDefaultAsync();
+                    if (technician!.Breach >= 3)
+                    {
+                        technician!.Breach = 3;
+                    }
+                    else
+                    {
+                        technician!.Breach = technician!.Breach + 1;
+                    }
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+        }
+        public async Task SetMaintenanceSchedulesNotifyMissing()
+        {
+            var maintainSchedule = await _context.MaintenanceSchedules.Where(a => a.IsDelete == false && a.Status!.Equals("WARNING")).ToListAsync();
+            foreach (var item in maintainSchedule)
+            {
+                if (item.MaintainTime!.Value.AddDays(7).Date == DateTime.UtcNow.AddHours(7).Date)
                 {
                     item.UpdateDate = DateTime.UtcNow.AddHours(7);
                     item.Status = ScheduleStatus.MISSED.ToString();
@@ -177,20 +268,7 @@ namespace UPOD.SERVICES.Services
             }
 
         }
-        public async Task SetMaintenanceSchedulesMaintaining()
-        {
-            var maintainSchedule = await _context.MaintenanceSchedules.Where(a => a.Status!.Equals("MAINTAINING")).ToListAsync();
-            foreach (var item in maintainSchedule)
-            {
-                var contractDate = await _context.Contracts.Where(a => a.Id.Equals(item.ContractId)).FirstOrDefaultAsync();
-                if (DateTime.UtcNow.AddHours(7).Date > contractDate!.EndDate!.Value.Date)
-                {
-                    item.UpdateDate = DateTime.UtcNow.AddHours(7);
-                    item.Status = ScheduleStatus.MISSED.ToString();
-                    await _context.SaveChangesAsync();
-                }
-            }
-        }
+
         public async Task<ResponseModel<MaintenanceScheduleResponse>> GetListMaintenanceSchedules(PaginationRequest model, FilterStatusRequest value)
         {
             var total = await _context.MaintenanceSchedules.Where(a => a.IsDelete == false).ToListAsync();
@@ -515,7 +593,7 @@ namespace UPOD.SERVICES.Services
             var message = "blank";
             var status = 500;
             var data = new MaintenanceScheduleResponse();
-            if (model.maintain_time!.Value.Date < DateTime.UtcNow.AddHours(7) && model.maintain_time!.Value.Date != maintenanceSchedule!.MaintainTime!.Value.Date)
+            if (model.maintain_time!.Value.Date < DateTime.UtcNow.AddHours(7).Date)
             {
                 message = "Maintain time must be greater than current day";
                 status = 400;
@@ -526,6 +604,7 @@ namespace UPOD.SERVICES.Services
                 status = 200;
                 maintenanceSchedule!.Description = model.description;
                 maintenanceSchedule!.MaintainTime = model.maintain_time;
+                maintenanceSchedule!.TechnicianId = model.technician_id;
                 maintenanceSchedule!.Status = ScheduleStatus.SCHEDULED.ToString();
                 maintenanceSchedule.UpdateDate = DateTime.UtcNow.AddHours(7);
                 var rs = await _context.SaveChangesAsync();

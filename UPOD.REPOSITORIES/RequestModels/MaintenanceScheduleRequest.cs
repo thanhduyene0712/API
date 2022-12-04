@@ -9,6 +9,7 @@ namespace UPOD.REPOSITORIES.RequestModels
     public class MaintenanceScheduleRequest
     {
         public string? description { get; set; }
+        public Guid? technician_id { get; set; }
         public DateTime? maintain_time { get; set; }
     }
 }
