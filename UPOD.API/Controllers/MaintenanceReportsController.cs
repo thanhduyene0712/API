@@ -56,32 +56,6 @@ namespace UPOD.API.Controllers
             }
         }
         [HttpPut]
-        [Route("processing_maintenance_report")]
-        public async Task<ActionResult<ObjectModelResponse>> SetStatusProcessingMaintenanceReport(Guid id)
-        {
-            try
-            {
-                return await _maintenance_report_sv.SetStatusProcessingMaintenanceReport(id);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-        [HttpPut]
-        [Route("unprocessing_maintenance_report")]
-        public async Task<ActionResult<ObjectModelResponse>> SetUnProcessingMaintenanceReport(Guid id)
-        {
-            try
-            {
-                return await _maintenance_report_sv.SetUnProcessingMaintenanceReport(id);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-        [HttpPut]
         [Route("update_maintenance_report")]
         public async Task<ActionResult<ObjectModelResponse>> UpdateMaintenanceReport(Guid id, MaintenanceReportRequest model)
         {

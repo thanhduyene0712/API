@@ -30,6 +30,7 @@ namespace UPOD.REPOSITORIES.Models
         public virtual DbSet<MaintenanceReport> MaintenanceReports { get; set; } = null!;
         public virtual DbSet<MaintenanceReportService> MaintenanceReportServices { get; set; } = null!;
         public virtual DbSet<MaintenanceSchedule> MaintenanceSchedules { get; set; } = null!;
+        public virtual DbSet<MaintenanceReportDevice> MaintenanceReportDevices { get; set; } = null!;
         public virtual DbSet<Request> Requests { get; set; } = null!;
         public virtual DbSet<Role> Roles { get; set; } = null!;
         public virtual DbSet<Service> Services { get; set; } = null!;
@@ -41,7 +42,7 @@ namespace UPOD.REPOSITORIES.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
                 optionsBuilder.UseSqlServer("Server=localhost,1433;Initial Catalog=Database_UPOD;User ID=sa;Password=THANHDUYEN07121999;Trusted_Connection=True;");
             }
         }
@@ -283,7 +284,7 @@ namespace UPOD.REPOSITORIES.Models
                     .HasConstraintName("DeviceTypeServiceITSupport");
             });
 
-           
+
             modelBuilder.Entity<Image>(entity =>
             {
                 entity.ToTable("Image");
@@ -317,8 +318,6 @@ namespace UPOD.REPOSITORIES.Models
                 entity.Property(e => e.Code).HasMaxLength(255);
 
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
-
-                entity.Property(e => e.Description).HasMaxLength(255);
 
                 entity.Property(e => e.Name).HasMaxLength(255);
 
@@ -364,6 +363,33 @@ namespace UPOD.REPOSITORIES.Models
                     .WithMany(p => p.MaintenanceReportServices)
                     .HasForeignKey(d => d.ServiceId)
                     .HasConstraintName("FK_MaintenanceReportService_Service");
+            });
+
+            modelBuilder.Entity<MaintenanceReportDevice>(entity =>
+            {
+                entity.ToTable("MaintenanceReportDevice");
+
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.Description).HasMaxLength(255);
+
+                entity.Property(e => e.Solution).HasMaxLength(255);
+
+                entity.HasOne(d => d.Device)
+                   .WithMany(p => p.MaintenanceReportDevices)
+                   .HasForeignKey(d => d.DeviceId)
+                   .HasConstraintName("FK_MaintenanceReportDevice");
+
+                entity.HasOne(d => d.Service)
+                   .WithMany(p => p.MaintenanceReportDevices)
+                   .HasForeignKey(d => d.ServiceId)
+                   .HasConstraintName("FK_MaintenanceReportDevice_Service");
+
+                entity.HasOne(d => d.MaintenanceReport)
+                    .WithMany(p => p.MaintenanceReportDevices)
+                    .HasForeignKey(d => d.MaintenanceReportId)
+                    .HasConstraintName("FK_MaintenanceReportDevice_MaintenanceReport");
+
             });
 
             modelBuilder.Entity<MaintenanceSchedule>(entity =>

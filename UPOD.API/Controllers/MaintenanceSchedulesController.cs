@@ -62,8 +62,6 @@ namespace UPOD.API.Controllers
                 await _maintenanceSchedule_sv.SetMaintenanceSchedulesNotifyWarning();
                 await _maintenanceSchedule_sv.SetMaintenanceSchedulesNotifyMissing();
                 await _contract_sv.SetContractNotify();
-                await _maintenanceReport_sv.SetMaintenanceReportStatus();
-                await _maintenanceReport_sv.SetMaintenanceReportStatusProcessing();
                 await _request_Sv.WarningRequest();
                 await _request_Sv.CompletedRequest();
                 var timeShedule = DateTime.SpecifyKind(DateTime.UtcNow.AddMinutes(5), DateTimeKind.Utc);
@@ -96,6 +94,19 @@ namespace UPOD.API.Controllers
             try
             {
                 return await _maintenanceSchedule_sv.MaintenanceScheduleDetails(id);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet]
+        [Route("get_technician_maintenance_schedule_by_id")]
+        public async Task<ActionResult<ResponseModel<TechnicianOfRequestResponse>>> GetTechnicianSchedule(Guid id)
+        {
+            try
+            {
+                return await _maintenanceSchedule_sv.GetTechnicianSchedule(id);
             }
             catch (Exception ex)
             {

@@ -25,8 +25,7 @@ namespace UPOD.SERVICES.Enum
         //1:có service hư, 2: không có service hư (nên có 2 status này)
         TROUBLED,
         STABILIZED,
-        PROCESSING,
-        CLOSED
+        COMPLETED
     }
     public enum ScheduleStatus
     {
@@ -51,5 +50,7 @@ namespace UPOD.SERVICES.Enum
         MR, //Maintenance report
         AD, //Admin
         MS, //Maintenance Schedule
+        MRD, //Maintenance Report Device
+        MRS, //Maintenance Report Service
     }
 }

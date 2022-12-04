@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using UPOD.REPOSITORIES.Models;
 using UPOD.REPOSITORIES.RequestModels;
 using UPOD.REPOSITORIES.ResponseModels;
 using UPOD.REPOSITORIES.ResponseViewModel;
@@ -118,6 +119,19 @@ namespace UPOD.API.Controllers
             try
             {
                 return await _customer_sv.CreateCustomer(model);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpPost]
+        [Route("approve_maintenance_report_by_report_id")]
+        public async Task<ActionResult<ResponseModel<RequestCreateResponse>>> ApproveMaintainReport(Guid report_id)
+        {
+            try
+            {
+                return await _customer_sv.ApproveMaintainReport(report_id);
             }
             catch (Exception ex)
             {

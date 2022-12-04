@@ -19,6 +19,7 @@ namespace UPOD.SERVICES.Services
         Task<ObjectModelResponse> MaintainingSchedule(Guid id, Guid tech_id);
         Task<ObjectModelResponse> DisableMaintenanceSchedule(Guid id);
         Task<ObjectModelResponse> MaintenanceScheduleDetails(Guid id);
+        Task<ResponseModel<TechnicianOfRequestResponse>> GetTechnicianSchedule(Guid id);
         Task<List<MaintenanceSchedule>> SetMaintenanceSchedulesNotify();
         Task SetMaintenanceSchedulesNotifyWarning();
         Task SetMaintenanceSchedulesNotifyMissing();
@@ -30,6 +31,81 @@ namespace UPOD.SERVICES.Services
         public MaintenanceScheduleServices(Database_UPODContext context)
         {
             _context = context;
+        }
+        public async Task<ResponseModel<TechnicianOfRequestResponse>> GetTechnicianSchedule(Guid id)
+        {
+
+            var maintenanceSchedule = await _context.MaintenanceSchedules.Where(a => a.Id.Equals(id)).FirstOrDefaultAsync();
+            var agency = await _context.Agencies.Where(a => a.Id.Equals(maintenanceSchedule!.AgencyId)).FirstOrDefaultAsync();
+            var contractService = await _context.ContractServices.Where(a => a.ContractId.Equals(maintenanceSchedule!.ContractId)).Select(a => a.Service).ToListAsync();
+            var area = await _context.Areas.Where(a => a.Id.Equals(agency!.AreaId)).FirstOrDefaultAsync();
+            var technicians = new List<TechnicianOfRequestResponse>();
+            var technicianList = new List<TechnicianOfRequestResponse>();
+            DateTime date = DateTime.UtcNow.AddHours(7);
+            var total = await _context.Skills.Where(a => a.Technician.AreaId.Equals(area!.Id)
+            && a.Technician.IsBusy == false
+            && a.Technician.IsDelete == false).ToListAsync();
+            if (total.Count > 0)
+            {
+                foreach (var item in contractService)
+                {
+                    total = await _context.Skills.Where(a => a.Technician.AreaId.Equals(area!.Id)
+                    && a.ServiceId.Equals(item!.Id)
+                    && a.Technician.IsBusy == false
+                    && a.Technician.IsDelete == false).ToListAsync();
+                    foreach (var item1 in total)
+                    {
+                        date = date.AddDays((-date.Day) + 1).Date;
+                        var requests = await _context.Requests.Where(a => a.IsDelete == false
+                        && a.CurrentTechnicianId.Equals(item1.TechnicianId)
+                        && a.RequestStatus.Equals("COMPLETED")
+                        && a.CreateDate!.Value.Date >= date
+                        && a.CreateDate!.Value.Date <= DateTime.UtcNow.AddHours(7)).ToListAsync();
+                        var count = requests.Count;
+                        technicians.Add(new TechnicianOfRequestResponse
+                        {
+                            id = item1.TechnicianId,
+                            code = _context.Technicians.Where(a => a.IsDelete == false && a.Id.Equals(item1.TechnicianId)).Select(a => a.Code).FirstOrDefault(),
+                            technician_name = _context.Technicians.Where(a => a.IsDelete == false && a.Id.Equals(item1.TechnicianId)).Select(a => a.TechnicianName).FirstOrDefault(),
+                            number_of_requests = count,
+                        });
+                    }
+                }
+
+            }
+            else
+            {
+                foreach (var item in contractService)
+                {
+                    total = await _context.Skills.Where(a => a.Technician.IsBusy == false
+                    && a.ServiceId.Equals(item!.Id)
+                    && a.Technician.IsDelete == false).ToListAsync();
+                    foreach (var item1 in total)
+                    {
+                        date = date.AddDays((-date.Day) + 1).Date;
+                        var requests = await _context.Requests.Where(a => a.IsDelete == false
+                        && a.CurrentTechnicianId.Equals(item1.TechnicianId)
+                        && a.RequestStatus.Equals("COMPLETED")
+                        && a.CreateDate!.Value.Date >= date
+                        && a.CreateDate!.Value.Date <= DateTime.UtcNow.AddHours(7)).ToListAsync();
+                        var count = requests.Count;
+                        technicians.Add(new TechnicianOfRequestResponse
+                        {
+                            id = item1.TechnicianId,
+                            code = _context.Technicians.Where(a => a.IsDelete == false && a.Id.Equals(item1.TechnicianId)).Select(a => a.Code).FirstOrDefault(),
+                            technician_name = _context.Technicians.Where(a => a.IsDelete == false && a.Id.Equals(item1.TechnicianId)).Select(a => a.TechnicianName).FirstOrDefault(),
+                            number_of_requests = count,
+                        });
+                    }
+                }
+
+            }
+            technicianList = technicians.OrderBy(x => x.number_of_requests).Distinct().ToList();
+            return new ResponseModel<TechnicianOfRequestResponse>(technicianList)
+            {
+                Total = total.Count,
+                Type = "Technicians"
+            };
         }
         public async Task<ObjectModelResponse> AcceptMaintenanceSchedule(Guid id, Guid tech_id)
         {

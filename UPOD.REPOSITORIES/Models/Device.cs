@@ -8,6 +8,7 @@ namespace UPOD.REPOSITORIES.Models
         public Device()
         {
             RequestDevices = new HashSet<RequestDevice>();
+            MaintenanceReportDevices = new HashSet<MaintenanceReportDevice>();
         }
 
         public Guid Id { get; set; }
@@ -27,5 +28,6 @@ namespace UPOD.REPOSITORIES.Models
         public virtual Agency? Agency { get; set; }
         public virtual DeviceType? DeviceType { get; set; }
         public virtual ICollection<RequestDevice> RequestDevices { get; set; }
+        public virtual ICollection<MaintenanceReportDevice> MaintenanceReportDevices { get; set; }
     }
 }

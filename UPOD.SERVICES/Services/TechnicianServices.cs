@@ -880,12 +880,12 @@ namespace UPOD.SERVICES.Services
                 status = 201;
                 foreach (var device in devices)
                 {
-                    _context.RequestDevices.Remove(device);
-                    var imgs = await _context.Images.Where(a => a.CurrentObject_Id.Equals(device.Id)).ToListAsync();
+                    var imgs = await _context.Images.Where(a => a.CurrentObject_Id.Equals(device.Id) && a.ObjectName.Equals(ObjectName.RE.ToString())).ToListAsync();
                     foreach (var item in imgs)
                     {
                         _context.Images.Remove(item);
                     }
+                    _context.RequestDevices.Remove(device);
                 }
                 foreach (var item in model.ticket)
                 {
