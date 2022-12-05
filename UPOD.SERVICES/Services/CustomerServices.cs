@@ -649,6 +649,84 @@ namespace UPOD.SERVICES.Services
                         }
                     }).OrderByDescending(x => x.update_date).Skip((model.PageNumber - 1) * model.PageSize).Take(model.PageSize).ToListAsync();
                 }
+                else if (value.search.ToLower().Contains("system"))
+                {
+                    var agency_name = await _context.Agencies.Where(a => a.AgencyName!.Contains(value.search!)).Select(a => a.Id).FirstOrDefaultAsync();
+                    var customer_name = await _context.Customers.Where(a => a.Name!.Contains(value.search!)).Select(a => a.Id).FirstOrDefaultAsync();
+                    var contract_name = await _context.Contracts.Where(a => a.ContractName!.Contains(value.search!)).Select(a => a.Id).FirstOrDefaultAsync();
+                    var service_name = await _context.Services.Where(a => a.ServiceName!.Contains(value.search!)).Select(a => a.Id).FirstOrDefaultAsync();
+                    total = await _context.Requests.Where(a => a.IsDelete == false
+                    && a.IsSystem == true
+                    && (a.RequestStatus!.Contains(value.status!)
+                    && (a.RequestName!.Contains(value.search!)
+                    || a.Code!.Contains(value.search!)
+                    || a.RequestDesciption!.Contains(value.search!)
+                    || a.AgencyId!.Equals(agency_name)
+                    || a.CustomerId!.Equals(customer_name)
+                    || a.ContractId!.Equals(contract_name)
+                    || a.ServiceId!.Equals(service_name)))).ToListAsync();
+                    requests = await _context.Requests.Where(a => a.IsDelete == false
+                    && a.IsSystem == true
+                    && (a.RequestName!.Contains(value.search!)
+                    || a.Code!.Contains(value.search)
+                    || a.RequestDesciption!.Contains(value.search!)
+                    || a.AgencyId!.Equals(agency_name)
+                    || a.CustomerId!.Equals(customer_name)
+                    || a.ContractId!.Equals(contract_name)
+                    || a.ServiceId!.Equals(service_name))
+                    && (a.RequestStatus!.Contains(value.status!))).Select(a => new RequestResponse
+                    {
+                        id = a.Id,
+                        code = a.Code,
+                        request_name = a.RequestName,
+                        customer = new CustomerViewResponse
+                        {
+                            id = _context.Customers.Where(x => x.Id.Equals(a.CustomerId)).Select(x => x.Id).FirstOrDefault(),
+                            code = _context.Customers.Where(x => x.Id.Equals(a.CustomerId)).Select(x => x.Code).FirstOrDefault(),
+                            address = _context.Customers.Where(x => x.Id.Equals(a.CustomerId)).Select(x => x.Address).FirstOrDefault(),
+                            mail = _context.Customers.Where(x => x.Id.Equals(a.CustomerId)).Select(x => x.Mail).FirstOrDefault(),
+                            phone = _context.Customers.Where(x => x.Id.Equals(a.CustomerId)).Select(x => x.Phone).FirstOrDefault(),
+                            cus_name = _context.Customers.Where(x => x.Id.Equals(a.CustomerId)).Select(x => x.Name).FirstOrDefault(),
+                            description = _context.Customers.Where(x => x.Id.Equals(a.CustomerId)).Select(x => x.Description).FirstOrDefault(),
+                        },
+                        admin_id = a.AdminId,
+                        agency = new AgencyViewResponse
+                        {
+                            id = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(x => x.Id).FirstOrDefault(),
+                            code = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(x => x.Code).FirstOrDefault(),
+                            agency_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(x => x.AgencyName).FirstOrDefault(),
+                            address = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(x => x.Address).FirstOrDefault(),
+                            phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(x => x.Telephone).FirstOrDefault(),
+                        },
+                        service = new ServiceViewResponse
+                        {
+                            id = _context.Services.Where(x => x.Id.Equals(a.ServiceId)).Select(a => a.Id).FirstOrDefault(),
+                            code = _context.Services.Where(x => x.Id.Equals(a.ServiceId)).Select(a => a.Code).FirstOrDefault(),
+                            service_name = _context.Services.Where(x => x.Id.Equals(a.ServiceId)).Select(a => a.ServiceName).FirstOrDefault(),
+                            description = _context.Services.Where(x => x.Id.Equals(a.ServiceId)).Select(a => a.Description).FirstOrDefault(),
+                        },
+                        contract = new ContractViewResponse
+                        {
+                            id = _context.Contracts.Where(x => x.Id.Equals(a.ContractId)).Select(a => a.Id).FirstOrDefault(),
+                            code = _context.Contracts.Where(x => x.Id.Equals(a.ContractId)).Select(a => a.Code).FirstOrDefault(),
+                            name = _context.Contracts.Where(x => x.Id.Equals(a.ContractId)).Select(a => a.ContractName).FirstOrDefault(),
+                        },
+                        is_system = a.IsSystem,
+                        reject_reason = a.ReasonReject,
+                        description = a.RequestDesciption,
+                        request_status = a.RequestStatus,
+                        create_date = a.CreateDate,
+                        update_date = a.UpdateDate,
+                        technicican = new TechnicianViewResponse
+                        {
+                            id = _context.Technicians.Where(x => x.Id.Equals(a.CurrentTechnicianId)).Select(a => a.Id).FirstOrDefault(),
+                            code = _context.Technicians.Where(x => x.Id.Equals(a.CurrentTechnicianId)).Select(a => a.Code).FirstOrDefault(),
+                            tech_name = _context.Technicians.Where(x => x.Id.Equals(a.CurrentTechnicianId)).Select(a => a.TechnicianName).FirstOrDefault(),
+                            email = _context.Technicians.Where(x => x.Id.Equals(a.CurrentTechnicianId)).Select(a => a.Email).FirstOrDefault(),
+                            phone = _context.Technicians.Where(x => x.Id.Equals(a.CurrentTechnicianId)).Select(a => a.Telephone).FirstOrDefault(),
+                        },
+                    }).OrderByDescending(x => x.update_date).Skip((model.PageNumber - 1) * model.PageSize).Take(model.PageSize).ToListAsync();
+                }
                 else
                 {
                     total = await _context.Requests.Where(a => a.IsDelete == false
