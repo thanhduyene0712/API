@@ -369,6 +369,7 @@ namespace UPOD.SERVICES.Services
                         service_name = _context.Services.Where(x => x.Id.Equals(a.ServiceId)).Select(a => a.ServiceName).FirstOrDefault(),
                         description = _context.Services.Where(x => x.Id.Equals(a.ServiceId)).Select(a => a.Description).FirstOrDefault(),
                     },
+                    is_system = a.IsSystem,
                     reject_reason = a.ReasonReject,
                     description = a.RequestDesciption,
                     request_status = a.RequestStatus,
@@ -447,6 +448,7 @@ namespace UPOD.SERVICES.Services
                             code = _context.Contracts.Where(x => x.Id.Equals(a.ContractId)).Select(a => a.Code).FirstOrDefault(),
                             name = _context.Contracts.Where(x => x.Id.Equals(a.ContractId)).Select(a => a.ContractName).FirstOrDefault(),
                         },
+                        is_system = a.IsSystem,
                         reject_reason = a.ReasonReject,
                         description = a.RequestDesciption,
                         request_status = a.RequestStatus,
@@ -522,6 +524,7 @@ namespace UPOD.SERVICES.Services
                             code = _context.Contracts.Where(x => x.Id.Equals(a.ContractId)).Select(a => a.Code).FirstOrDefault(),
                             name = _context.Contracts.Where(x => x.Id.Equals(a.ContractId)).Select(a => a.ContractName).FirstOrDefault(),
                         },
+                        is_system = a.IsSystem,
                         reject_reason = a.ReasonReject,
                         description = a.RequestDesciption,
                         request_status = a.RequestStatus,
@@ -785,6 +788,7 @@ namespace UPOD.SERVICES.Services
                         service_name = _context.Services.Where(x => x.Id.Equals(a.ServiceId)).Select(a => a.ServiceName).FirstOrDefault(),
                         description = _context.Services.Where(x => x.Id.Equals(a.ServiceId)).Select(a => a.Description).FirstOrDefault(),
                     },
+                    is_system = a.IsSystem,
                     start_time = a.StartTime,
                     end_time = a.EndTime,
                     duration_time = durationTime,
@@ -985,6 +989,7 @@ namespace UPOD.SERVICES.Services
                 StartTime = null,
                 EndTime = null,
                 AdminId = null,
+                IsSystem = false,
                 ContractId = contract_id
             };
             var data = new RequestCreateResponse();
@@ -1072,7 +1077,8 @@ namespace UPOD.SERVICES.Services
                 StartTime = null,
                 EndTime = null,
                 AdminId = model.admin_id,
-                ContractId = contract_id
+                ContractId = contract_id,
+                IsSystem = false,
             };
             var report_service = await _context.MaintenanceReportServices.Where(a => a.Id.Equals(model.report_service_id)).FirstOrDefaultAsync();
             report_service!.Created = true;

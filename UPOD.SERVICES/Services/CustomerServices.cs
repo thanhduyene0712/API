@@ -183,7 +183,8 @@ namespace UPOD.SERVICES.Services
                         StartTime = DateTime.UtcNow.AddHours(7),
                         EndTime = null,
                         AdminId = null,
-                        ContractId = contract_id
+                        ContractId = contract_id,
+                        IsSystem = true,
                     };
                     await _context.Requests.AddAsync(requestNew);
                     requests.Add(new RequestCreateResponse
