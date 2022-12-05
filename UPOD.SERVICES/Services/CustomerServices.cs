@@ -657,23 +657,11 @@ namespace UPOD.SERVICES.Services
                     var service_name = await _context.Services.Where(a => a.ServiceName!.Contains(value.search!)).Select(a => a.Id).FirstOrDefaultAsync();
                     total = await _context.Requests.Where(a => a.IsDelete == false
                     && a.IsSystem == true
-                    && (a.RequestStatus!.Contains(value.status!)
-                    && (a.RequestName!.Contains(value.search!)
-                    || a.Code!.Contains(value.search!)
-                    || a.RequestDesciption!.Contains(value.search!)
-                    || a.AgencyId!.Equals(agency_name)
-                    || a.CustomerId!.Equals(customer_name)
-                    || a.ContractId!.Equals(contract_name)
-                    || a.ServiceId!.Equals(service_name)))).ToListAsync();
+                    && a.CustomerId.Equals(id)
+                    && (a.RequestStatus!.Contains(value.status!))).ToListAsync();
                     requests = await _context.Requests.Where(a => a.IsDelete == false
                     && a.IsSystem == true
-                    && (a.RequestName!.Contains(value.search!)
-                    || a.Code!.Contains(value.search)
-                    || a.RequestDesciption!.Contains(value.search!)
-                    || a.AgencyId!.Equals(agency_name)
-                    || a.CustomerId!.Equals(customer_name)
-                    || a.ContractId!.Equals(contract_name)
-                    || a.ServiceId!.Equals(service_name))
+                    && a.CustomerId.Equals(id)
                     && (a.RequestStatus!.Contains(value.status!))).Select(a => new RequestResponse
                     {
                         id = a.Id,
