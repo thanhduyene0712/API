@@ -234,12 +234,18 @@ namespace UPOD.SERVICES.Services
             if (account.Role.RoleName!.Equals("Customer"))
             {
                 var customer = await _context.Customers.Where(a => a.IsDelete == false && a.AccountId.Equals(account.Id)).FirstOrDefaultAsync();
-                customer!.AccountId = null;
+                if (customer != null)
+                {
+                    customer!.AccountId = null;
+                }
             }
             else if (account.Role.RoleName!.Equals("Technician"))
             {
                 var technician = await _context.Technicians.Where(a => a.IsDelete == false && a.AccountId.Equals(account.Id)).FirstOrDefaultAsync();
-                technician!.AccountId = null;
+                if (technician != null)
+                {
+                    technician!.AccountId = null;
+                }
             }
             return new ObjectModelResponse(model)
             {
