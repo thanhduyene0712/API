@@ -163,6 +163,8 @@ namespace UPOD.SERVICES.Services
 
                     }
                     technicians.OrderBy(a => a.number_of_requests).ToList();
+                    item!.Created = true;
+                    item!.RequestId = request_id!;
                     var requestNew = new Request
                     {
                         Id = request_id,

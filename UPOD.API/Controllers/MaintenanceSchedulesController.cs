@@ -58,7 +58,6 @@ namespace UPOD.API.Controllers
                     });
                     await _notifyHub.Clients.All.SendAsync("NotifyMessage", item.TechnicianId);
                 }
-                await _request_Sv.SetClosedRequest();
                 await _maintenanceSchedule_sv.SetMaintenanceSchedulesNotifyWarning();
                 await _maintenanceSchedule_sv.SetMaintenanceSchedulesNotifyMissing();
                 await _contract_sv.SetContractNotify();

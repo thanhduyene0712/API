@@ -20,7 +20,7 @@ namespace UPOD.SERVICES.Services
         Task<ObjectModelResponse> UpdateRequestAdmin(Guid id, RequestUpdateAdminRequest model);
         Task<ObjectModelResponse> DisableRequest(Guid id);
         Task<ResponseModel<TechnicianOfRequestResponse>> GetTechnicianRequest(Guid id);
-        Task<ResponseModel<TechnicianOfRequestResponse>> GetTechnicianReport(Guid id);
+        Task<ResponseModel<TechnicianOfRequestResponse>> GetTechnicianRequestAdmin(Guid agency_id, Guid service_id);
         Task<ObjectModelResponse> MappingTechnicianRequest(Guid request_id, Guid technician_id);
         Task<ResponseModel<DeviceResponse>> GetDeviceRequest(PaginationRequest model, Guid id);
         Task<ObjectModelResponse> CreateRequestByAdmin(RequestAdminRequest model);
@@ -30,7 +30,6 @@ namespace UPOD.SERVICES.Services
         Task<ObjectModelResponse> AutoFillRequestAdmin(Guid id);
         Task<ObjectModelResponse> GetTicketDetails(Guid id);
         Task<ObjectModelResponse> GetContractByCustomerSerivce(Guid cus_id, Guid service_id);
-        Task SetClosedRequest();
         Task WarningRequest();
         Task CompletedRequest();
         Task<ResponseModel<RequestResponse>> GetListRequestsOfAgency(PaginationRequest model, Guid id, FilterStatusRequest value);
@@ -42,19 +41,6 @@ namespace UPOD.SERVICES.Services
         public RequestServices(Database_UPODContext context)
         {
             _context = context;
-        }
-        public async Task SetClosedRequest()
-        {
-            var requests = await _context.Requests.Where(a => a.EndTime!.Value.AddDays(5).Date <= DateTime.UtcNow.AddHours(7).Date).ToListAsync();
-            foreach (var item in requests)
-            {
-                if (item.RequestStatus!.Equals("RESOLVED"))
-                {
-                    //item.UpdateDate = DateTime.UtcNow.AddHours(7);
-                    item.RequestStatus = ProcessStatus.COMPLETED.ToString();
-                }
-            }
-            await _context.SaveChangesAsync();
         }
         public async Task<ObjectModelResponse> GetTicketDetails(Guid id)
         {
@@ -730,14 +716,12 @@ namespace UPOD.SERVICES.Services
                 Type = "Technicians"
             };
         }
-        public async Task<ResponseModel<TechnicianOfRequestResponse>> GetTechnicianReport(Guid id)
+        public async Task<ResponseModel<TechnicianOfRequestResponse>> GetTechnicianRequestAdmin(Guid agency_id, Guid service_id)
         {
 
-            var reportService = await _context.MaintenanceReportServices.Where(a => a.Id.Equals(id)).FirstOrDefaultAsync();
-            var maintainReport = await _context.MaintenanceReports.Where(a => a.Id.Equals(reportService!.MaintenanceReportId)).FirstOrDefaultAsync();
-            var agency = await _context.Agencies.Where(a => a.Id.Equals(maintainReport!.AgencyId)).FirstOrDefaultAsync();
+            var agency = await _context.Agencies.Where(a => a.Id.Equals(agency_id)).FirstOrDefaultAsync();
             var area = await _context.Areas.Where(a => a.Id.Equals(agency!.AreaId)).FirstOrDefaultAsync();
-            var service = await _context.Services.Where(a => a.Id.Equals(reportService!.ServiceId)).FirstOrDefaultAsync();
+            var service = await _context.Services.Where(a => a.Id.Equals(service_id)).FirstOrDefaultAsync();
             var technicians = new List<TechnicianOfRequestResponse>();
             var technicianList = new List<TechnicianOfRequestResponse>();
             var total = await _context.Skills.Where(a => a.ServiceId.Equals(service!.Id)
@@ -1389,7 +1373,7 @@ namespace UPOD.SERVICES.Services
         {
             var requests = await _context.Requests.Where(a => a.IsDelete == false
             && a.RequestStatus!.Equals("RESOLVED")
-            && a.UpdateDate!.Value.AddHours(12) <= DateTime.UtcNow.AddHours(7)).ToListAsync();
+            && a.EndTime!.Value.AddHours(12) <= DateTime.UtcNow.AddHours(7)).ToListAsync();
             if (requests.Count > 0)
             {
                 foreach (var item in requests)

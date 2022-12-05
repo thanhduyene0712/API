@@ -103,11 +103,11 @@ namespace UPOD.API.Controllers
         }
         [HttpGet]
         [Route("get_technicians_by_id_report_service")]
-        public async Task<ActionResult<ResponseModel<TechnicianOfRequestResponse>>> GetTechnicianReport(Guid id)
+        public async Task<ActionResult<ResponseModel<TechnicianOfRequestResponse>>> GetTechnicianRequestAdmin(Guid agency_id, Guid service_id)
         {
             try
             {
-                return await _request_sv.GetTechnicianReport(id);
+                return await _request_sv.GetTechnicianRequestAdmin(agency_id, service_id);
             }
             catch (Exception ex)
             {
