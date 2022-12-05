@@ -1123,11 +1123,12 @@ namespace UPOD.SERVICES.Services
                 Feedback = null,
                 Rating = 0,
                 CurrentTechnicianId = model.technician_id,
-                StartTime = null,
+                StartTime = DateTime.UtcNow.AddHours(7),
                 EndTime = null,
                 AdminId = model.admin_id,
                 ContractId = contract_id,
                 IsSystem = false,
+                
             };
             var data = new RequestCreateResponse();
 
