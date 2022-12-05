@@ -756,30 +756,42 @@ namespace UPOD.SERVICES.Services
             account!.RoleId = model.role_id;
             account!.Password = model.password;
             account!.UpdateDate = DateTime.UtcNow.AddHours(7);
-            var rs = await _context.SaveChangesAsync();
-            if (rs > 0)
+            var message = "blank";
+            var status = 500;
+            if (model.password!.Length <= 7)
             {
-                data = new AccountResponse
-                {
-                    id = account!.Id,
-                    code = account.Code,
-                    role = new RoleResponse
-                    {
-                        id = _context.Roles.Where(a => a.Id.Equals(account.RoleId)).Select(a => a.Id).FirstOrDefault(),
-                        code = _context.Roles.Where(a => a.Id.Equals(account.RoleId)).Select(a => a.Code).FirstOrDefault(),
-                        role_name = _context.Roles.Where(a => a.Id.Equals(account.RoleId)).Select(a => a.RoleName).FirstOrDefault(),
-                    },
-                    username = account.Username,
-                    is_delete = account.IsDelete,
-                    create_date = account.CreateDate,
-                    update_date = account.UpdateDate,
-                    is_assign = account.IsAssign,
-                };
+                message = "Password must not be less than 8 characters!";
+                status = 400;
             }
-
+            else
+            {
+                message = "Successfully";
+                status = 200;
+                var rs = await _context.SaveChangesAsync();
+                if (rs > 0)
+                {
+                    data = new AccountResponse
+                    {
+                        id = account!.Id,
+                        code = account.Code,
+                        role = new RoleResponse
+                        {
+                            id = _context.Roles.Where(a => a.Id.Equals(account.RoleId)).Select(a => a.Id).FirstOrDefault(),
+                            code = _context.Roles.Where(a => a.Id.Equals(account.RoleId)).Select(a => a.Code).FirstOrDefault(),
+                            role_name = _context.Roles.Where(a => a.Id.Equals(account.RoleId)).Select(a => a.RoleName).FirstOrDefault(),
+                        },
+                        username = account.Username,
+                        is_delete = account.IsDelete,
+                        create_date = account.CreateDate,
+                        update_date = account.UpdateDate,
+                        is_assign = account.IsAssign,
+                    };
+                }
+            }
             return new ObjectModelResponse(data)
             {
-                Status = 201,
+                Status = status,
+                Message = message,
                 Type = "Account"
             };
         }

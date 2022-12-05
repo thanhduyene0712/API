@@ -842,7 +842,7 @@ namespace UPOD.SERVICES.Services
         {
 
             var services = await _context.ContractServices.Where(x => x.Contract!.CustomerId.Equals(id)
-            && x.Contract.IsDelete == false && x.Contract.IsExpire == false && x.IsDelete == false
+            && x.Contract.IsDelete == false && x.Contract.IsExpire == false && x.Contract.IsAccepted == true && x.IsDelete == false
             && (x.Contract.StartDate!.Value.Date <= DateTime.UtcNow.AddHours(7).Date
             && x.Contract.EndDate!.Value.Date >= DateTime.UtcNow.AddHours(7).Date)).Select(x => new ServiceResponse
             {
@@ -866,7 +866,7 @@ namespace UPOD.SERVICES.Services
         {
 
             var services_in_contract = await _context.ContractServices.Where(x => x.Contract!.CustomerId.Equals(id)
-            && x.Contract.IsDelete == false && x.Contract.IsExpire == false && x.IsDelete == false
+            && x.Contract.IsDelete == false && x.Contract.IsExpire == false && x.Contract.IsAccepted == true && x.IsDelete == false
             && (x.Contract.StartDate!.Value.Date <= DateTime.UtcNow.AddHours(7).Date
             && x.Contract.EndDate!.Value.Date >= DateTime.UtcNow.AddHours(7).Date)).Select(a => new ServiceNotInContractViewResponse
             {
