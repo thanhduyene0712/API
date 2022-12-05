@@ -115,6 +115,19 @@ namespace UPOD.API.Controllers
             }
         }
         [HttpGet]
+        [Route("get_contract_by_customer_service")]
+        public async Task<ActionResult<ObjectModelResponse>> GetContractByCustomerSerivce(Guid cus_id, Guid service_id)
+        {
+            try
+            {
+                return await _request_sv.GetContractByCustomerSerivce(cus_id, service_id);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet]
         [Route("get_devices_by_id_request")]
         public async Task<ActionResult<ResponseModel<DeviceResponse>>> GetDeviceRequest([FromQuery] PaginationRequest model, Guid id)
         {

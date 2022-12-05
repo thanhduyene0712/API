@@ -561,6 +561,7 @@ namespace UPOD.SERVICES.Services
                         code = _context.Contracts.Where(x => x.Id.Equals(a.ContractId)).Select(a => a.Code).FirstOrDefault(),
                         name = _context.Contracts.Where(x => x.Id.Equals(a.ContractId)).Select(a => a.ContractName).FirstOrDefault(),
                     },
+                    is_system = a.IsSystem,
                     reject_reason = a.ReasonReject,
                     description = a.RequestDesciption,
                     request_status = a.RequestStatus,
@@ -637,6 +638,7 @@ namespace UPOD.SERVICES.Services
                         request_status = a.RequestStatus,
                         create_date = a.CreateDate,
                         update_date = a.UpdateDate,
+                        is_system = a.IsSystem,
                         technicican = new TechnicianViewResponse
                         {
                             id = _context.Technicians.Where(x => x.Id.Equals(a.CurrentTechnicianId)).Select(a => a.Id).FirstOrDefault(),
@@ -717,6 +719,7 @@ namespace UPOD.SERVICES.Services
                         request_status = a.RequestStatus,
                         create_date = a.CreateDate,
                         update_date = a.UpdateDate,
+                        is_system = a.IsSystem,
                         technicican = new TechnicianViewResponse
                         {
                             id = _context.Technicians.Where(x => x.Id.Equals(a.CurrentTechnicianId)).Select(a => a.Id).FirstOrDefault(),

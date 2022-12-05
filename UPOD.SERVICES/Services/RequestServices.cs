@@ -29,6 +29,7 @@ namespace UPOD.SERVICES.Services
         Task<ObjectModelResponse> CancelRequest(Guid id, RejectRequest model);
         Task<ObjectModelResponse> AutoFillRequestAdmin(Guid id);
         Task<ObjectModelResponse> GetTicketDetails(Guid id);
+        Task<ObjectModelResponse> GetContractByCustomerSerivce(Guid cus_id, Guid service_id);
         Task SetClosedRequest();
         Task WarningRequest();
         Task CompletedRequest();
@@ -1128,8 +1129,43 @@ namespace UPOD.SERVICES.Services
             var request = await _context.Requests.OrderBy(x => x.Code).LastOrDefaultAsync();
             return CodeHelper.StringToInt(request!.Code!);
         }
+        public async Task<ObjectModelResponse> GetContractByCustomerSerivce(Guid cus_id, Guid service_id)
+        {
+            var contracts = await _context.Contracts.Where(a => a.CustomerId.Equals(cus_id)).ToListAsync();
+            Guid? contract_id = null;
+            foreach (var item in contracts)
+            {
+                var contract_services = await _context.ContractServices.Where(a => a.ContractId.Equals(item.Id)).ToListAsync();
+                foreach (var item1 in contract_services)
+                {
+                    if (item1.ServiceId.Equals(service_id))
+                    {
+                        contract_id = item1.ContractId;
+                    }
+                }
+            }
+            var contract = await _context.Contracts.Where(a => a.IsDelete == false && a.Id.Equals(contract_id)).FirstOrDefaultAsync();
+            return new ObjectModelResponse(contract)
+            {
+                Type = "Contract"
+            };
+        }
         public async Task<ObjectModelResponse> UpdateRequest(Guid id, RequestUpdateRequest model)
         {
+            var customer_id = await _context.Agencies.Where(a => a.Id.Equals(model.agency_id)).Select(a => a.CustomerId).FirstOrDefaultAsync();
+            var contracts = await _context.Contracts.Where(a => a.CustomerId.Equals(customer_id)).ToListAsync();
+            Guid? contract_id = null;
+            foreach (var item in contracts)
+            {
+                var contract_services = await _context.ContractServices.Where(a => a.ContractId.Equals(item.Id)).ToListAsync();
+                foreach (var item1 in contract_services)
+                {
+                    if (item1.ServiceId.Equals(model.service_id))
+                    {
+                        contract_id = item1.ContractId;
+                    }
+                }
+            }
             var request = await _context.Requests.Where(a => a.Id.Equals(id)).Select(x => new Request
             {
                 Id = id,
@@ -1141,6 +1177,7 @@ namespace UPOD.SERVICES.Services
                 RequestDesciption = model.request_description,
                 RequestStatus = x.RequestStatus,
                 CreateDate = x.CreateDate,
+                ContractId = contract_id,
                 UpdateDate = DateTime.UtcNow.AddHours(7),
                 IsDelete = _context.Requests.Where(a => a.Id.Equals(id)).Select(x => x.IsDelete).FirstOrDefault(),
                 Feedback = _context.Requests.Where(a => a.Id.Equals(id)).Select(x => x.Feedback).FirstOrDefault(),
