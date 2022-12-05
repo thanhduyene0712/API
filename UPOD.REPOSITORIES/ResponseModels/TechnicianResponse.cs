@@ -20,6 +20,7 @@ namespace UPOD.REPOSITORIES.ResponseModels
         public string? address { get; set; }
         public bool? is_busy { get; set; }
         public bool? is_delete { get; set; }
+        public int? breach { get; set; }
         public DateTime? create_date { get; set; }
         public DateTime? update_date { get; set; }
         public List<ServiceViewResponse> service { get; set; } = null!;

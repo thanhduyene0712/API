@@ -719,6 +719,7 @@ namespace UPOD.SERVICES.Services
                     username = _context.Accounts.Where(x => x.Id.Equals(a.AccountId)).Select(x => x.Username).FirstOrDefault(),
                     password = _context.Accounts.Where(x => x.Id.Equals(a.AccountId)).Select(x => x.Password).FirstOrDefault(),
                 },
+                breach = a.Breach,
                 telephone = a.Telephone,
                 email = a.Email,
                 gender = a.Gender,
