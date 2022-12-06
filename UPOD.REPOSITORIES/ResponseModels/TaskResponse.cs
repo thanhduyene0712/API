@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UPOD.REPOSITORIES.ResponseViewModel;
 
 namespace UPOD.REPOSITORIES.ResponseModels
 {
@@ -17,5 +18,21 @@ namespace UPOD.REPOSITORIES.ResponseModels
         public string? agency_name { get; set; }
         public DateTime? created_date { get; set; }
         public DateTime? update_date { get; set; }
+        public override bool Equals(object? obj)
+        {
+            TaskResponse? item = obj as TaskResponse;
+
+            if (item == null)
+            {
+                return false;
+            }
+
+            return item.id == this.id;
+        }
+        public override int GetHashCode()
+        {
+            return this.id.GetHashCode() * 25;
+        }
+
     }
 }

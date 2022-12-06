@@ -219,7 +219,7 @@ namespace UPOD.SERVICES.Services
                         address = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Address).FirstOrDefault(),
                         phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Telephone).FirstOrDefault()
                     }
-                }).OrderByDescending(a => a.update_date).Skip((model.PageNumber - 1) * model.PageSize).Take(model.PageSize).ToListAsync();
+                }).OrderByDescending(a => a.update_date).ToListAsync();
             }
             else
             {
@@ -271,7 +271,7 @@ namespace UPOD.SERVICES.Services
                          address = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Address).FirstOrDefault(),
                          phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Telephone).FirstOrDefault()
                      }
-                 }).OrderByDescending(a => a.update_date).Skip((model.PageNumber - 1) * model.PageSize).Take(model.PageSize).ToListAsync();
+                 }).OrderByDescending(a => a.update_date).ToListAsync();
 
             }
             var listTask = new List<TaskResponse>();
@@ -312,7 +312,7 @@ namespace UPOD.SERVICES.Services
                             name = item.request_name,
                             status = item.request_status,
                             agency_name = item.agency.agency_name,
-                            customer_name = _context.Agencies.Where(a => a.Id.Equals(item.agency.id)).Select(a => a.Customer!.Name).FirstOrDefault(),
+                            customer_name = item.customer.cus_name,
                             created_date = item.create_date,
                             update_date = item.update_date,
                         });
@@ -320,17 +320,54 @@ namespace UPOD.SERVICES.Services
                 }
                 else
                 {
-                    //listTask.Add(new TaskResponse
-                    //{
-                    //    request = requests,
-                    //    maintain = maintenanceSchedules
-
-                    //});
-                    total = requests.Count + maintenanceSchedules.Count;
-
+                    var listRequest = new List<TaskResponse>();
+                    var listMaintain = new List<TaskResponse>();
+                    foreach (var item in requests)
+                    {
+                        listRequest.Add(new TaskResponse
+                        {
+                            task = "Request",
+                            id = item.id,
+                            code = item.code,
+                            name = item.request_name,
+                            status = item.request_status,
+                            agency_name = item.agency.agency_name,
+                            customer_name = item.customer.cus_name,
+                            created_date = item.create_date,
+                            update_date = item.update_date,
+                        });
+                    }
+                    foreach (var item in maintenanceSchedules)
+                    {
+                        listMaintain.Add(new TaskResponse
+                        {
+                            task = "Maintenance Schedule",
+                            id = item.id,
+                            code = item.code,
+                            name = item.name,
+                            status = item.status,
+                            agency_name = item.agency.agency_name,
+                            customer_name = _context.Agencies.Where(a => a.Id.Equals(item.agency.id)).Select(a => a.Customer!.Name).FirstOrDefault(),
+                            created_date = item.create_date,
+                            update_date = item.update_date,
+                        });
+                    }
+                    if (listRequest.Count > 0 && listMaintain.Count == 0)
+                    {
+                        listTask = listRequest;
+                    }
+                    else if (listRequest.Count == 0 && listMaintain.Count > 0)
+                    {
+                        listTask = listMaintain;
+                    }
+                    else
+                    {
+                        listTask = listRequest.Concat(listMaintain).OrderByDescending(a => a.update_date).Skip((model.PageNumber - 1) * model.PageSize).ToList();
+                    }
                 }
                 message = "Successfully";
                 status = 200;
+                total = listTask.Count;
             }
             else
             {
