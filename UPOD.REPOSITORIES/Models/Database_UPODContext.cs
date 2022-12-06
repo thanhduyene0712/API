@@ -55,17 +55,17 @@ namespace UPOD.REPOSITORIES.Models
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.Code).HasMaxLength(255);
+                entity.Property(e => e.Code).HasMaxLength(2000);
 
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
                 entity.Property(e => e.Password)
-                    .HasMaxLength(100)
+                    .HasMaxLength(2000)
                     .IsUnicode(false);
 
                 entity.Property(e => e.UpdateDate).HasColumnType("datetime");
 
-                entity.Property(e => e.Username).HasMaxLength(250);
+                entity.Property(e => e.Username).HasMaxLength(2000);
 
                 entity.HasOne(d => d.Role)
                     .WithMany(p => p.Accounts)
@@ -79,17 +79,17 @@ namespace UPOD.REPOSITORIES.Models
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.Address).HasMaxLength(255);
+                entity.Property(e => e.Address).HasMaxLength(2000);
 
-                entity.Property(e => e.Code).HasMaxLength(250);
+                entity.Property(e => e.Code).HasMaxLength(2000);
 
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
-                entity.Property(e => e.Mail).HasMaxLength(250);
+                entity.Property(e => e.Mail).HasMaxLength(2000);
 
-                entity.Property(e => e.Name).HasMaxLength(255);
+                entity.Property(e => e.Name).HasMaxLength(2000);
 
-                entity.Property(e => e.Telephone).HasMaxLength(250);
+                entity.Property(e => e.Telephone).HasMaxLength(2000);
 
                 entity.Property(e => e.UpdateDate).HasColumnType("datetime");
 
@@ -105,13 +105,13 @@ namespace UPOD.REPOSITORIES.Models
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.AgencyName).HasMaxLength(250);
+                entity.Property(e => e.AgencyName).HasMaxLength(2000);
 
-                entity.Property(e => e.Code).HasMaxLength(255);
+                entity.Property(e => e.Code).HasMaxLength(2000);
 
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
-                entity.Property(e => e.ManagerName).HasMaxLength(250);
+                entity.Property(e => e.ManagerName).HasMaxLength(2000);
 
                 entity.Property(e => e.Telephone)
                     .HasMaxLength(20)
@@ -141,13 +141,13 @@ namespace UPOD.REPOSITORIES.Models
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.AreaName).HasMaxLength(250);
+                entity.Property(e => e.AreaName).HasMaxLength(2000);
 
-                entity.Property(e => e.Code).HasMaxLength(255);
+                entity.Property(e => e.Code).HasMaxLength(2000);
 
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
-                entity.Property(e => e.Description).HasMaxLength(250);
+                entity.Property(e => e.Description).HasMaxLength(2000);
 
                 entity.Property(e => e.UpdateDate).HasColumnType("datetime");
             });
@@ -158,23 +158,23 @@ namespace UPOD.REPOSITORIES.Models
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.Attachment).HasMaxLength(500);
+                entity.Property(e => e.Attachment).HasMaxLength(2000);
 
-                entity.Property(e => e.Code).HasMaxLength(255);
+                entity.Property(e => e.Code).HasMaxLength(2000);
 
-                entity.Property(e => e.ContractName).HasMaxLength(200);
+                entity.Property(e => e.ContractName).HasMaxLength(2000);
 
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
-                entity.Property(e => e.Description).HasMaxLength(300);
+                entity.Property(e => e.Description).HasMaxLength(2000);
 
-                entity.Property(e => e.RejectReason).HasMaxLength(300);
+                entity.Property(e => e.RejectReason).HasMaxLength(2000);
 
                 entity.Property(e => e.EndDate).HasColumnType("datetime");
 
                 entity.Property(e => e.StartDate).HasColumnType("datetime");
 
-                entity.Property(e => e.TerminalContent).HasMaxLength(255);
+                entity.Property(e => e.TerminalContent).HasMaxLength(2000);
 
                 entity.Property(e => e.TerminalTime).HasColumnType("datetime");
 
@@ -209,19 +209,19 @@ namespace UPOD.REPOSITORIES.Models
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.Address).HasMaxLength(255);
+                entity.Property(e => e.Address).HasMaxLength(2000);
 
-                entity.Property(e => e.Code).HasMaxLength(255);
+                entity.Property(e => e.Code).HasMaxLength(2000);
 
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
-                entity.Property(e => e.Description).HasMaxLength(250);
+                entity.Property(e => e.Description).HasMaxLength(2000);
 
-                entity.Property(e => e.Mail).HasMaxLength(255);
+                entity.Property(e => e.Mail).HasMaxLength(2000);
 
-                entity.Property(e => e.Name).HasMaxLength(250);
+                entity.Property(e => e.Name).HasMaxLength(2000);
 
-                entity.Property(e => e.Phone).HasMaxLength(255);
+                entity.Property(e => e.Phone).HasMaxLength(2000);
 
                 entity.Property(e => e.UpdateDate).HasColumnType("datetime");
 
@@ -237,17 +237,17 @@ namespace UPOD.REPOSITORIES.Models
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.Code).HasMaxLength(255);
+                entity.Property(e => e.Code).HasMaxLength(2000);
 
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
-                entity.Property(e => e.DeviceName).HasMaxLength(300);
+                entity.Property(e => e.DeviceName).HasMaxLength(2000);
 
                 entity.Property(e => e.GuarantyEndDate).HasColumnType("datetime");
 
                 entity.Property(e => e.GuarantyStartDate).HasColumnType("datetime");
 
-                entity.Property(e => e.Other).HasMaxLength(300);
+                entity.Property(e => e.Other).HasMaxLength(2000);
 
                 entity.Property(e => e.SettingDate).HasColumnType("datetime");
 
@@ -270,11 +270,11 @@ namespace UPOD.REPOSITORIES.Models
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.Code).HasMaxLength(255);
+                entity.Property(e => e.Code).HasMaxLength(2000);
 
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
-                entity.Property(e => e.DeviceTypeName).HasMaxLength(250);
+                entity.Property(e => e.DeviceTypeName).HasMaxLength(2000);
 
                 entity.Property(e => e.UpdateDate).HasColumnType("datetime");
 
@@ -289,9 +289,9 @@ namespace UPOD.REPOSITORIES.Models
             {
                 entity.ToTable("Image");
 
-                entity.Property(e => e.Link).HasMaxLength(255);
+                entity.Property(e => e.Link).HasMaxLength(2000);
 
-                entity.Property(e => e.ObjectName).HasMaxLength(255);
+                entity.Property(e => e.ObjectName).HasMaxLength(2000);
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
             });
@@ -300,9 +300,9 @@ namespace UPOD.REPOSITORIES.Models
             {
                 entity.ToTable("Notification");
 
-                entity.Property(e => e.NotificationContent).HasMaxLength(255);
+                entity.Property(e => e.NotificationContent).HasMaxLength(2000);
 
-                entity.Property(e => e.ObjectName).HasMaxLength(255);
+                entity.Property(e => e.ObjectName).HasMaxLength(2000);
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
@@ -315,13 +315,13 @@ namespace UPOD.REPOSITORIES.Models
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.Code).HasMaxLength(255);
+                entity.Property(e => e.Code).HasMaxLength(2000);
 
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
-                entity.Property(e => e.Name).HasMaxLength(255);
+                entity.Property(e => e.Name).HasMaxLength(2000);
 
-                entity.Property(e => e.Status).HasMaxLength(255);
+                entity.Property(e => e.Status).HasMaxLength(2000);
 
                 entity.Property(e => e.UpdateDate).HasColumnType("datetime");
 
@@ -352,7 +352,7 @@ namespace UPOD.REPOSITORIES.Models
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.Description).HasMaxLength(255);
+                entity.Property(e => e.Description).HasMaxLength(2000);
 
                 entity.HasOne(d => d.MaintenanceReport)
                     .WithMany(p => p.MaintenanceReportServices)
@@ -371,9 +371,9 @@ namespace UPOD.REPOSITORIES.Models
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.Description).HasMaxLength(255);
+                entity.Property(e => e.Description).HasMaxLength(2000);
 
-                entity.Property(e => e.Solution).HasMaxLength(255);
+                entity.Property(e => e.Solution).HasMaxLength(2000);
 
                 entity.HasOne(d => d.Device)
                    .WithMany(p => p.MaintenanceReportDevices)
@@ -398,7 +398,7 @@ namespace UPOD.REPOSITORIES.Models
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.Code).HasMaxLength(255);
+                entity.Property(e => e.Code).HasMaxLength(2000);
 
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
@@ -406,11 +406,11 @@ namespace UPOD.REPOSITORIES.Models
 
                 entity.Property(e => e.MaintainTime).HasColumnType("datetime");
 
-                entity.Property(e => e.Name).HasMaxLength(250);
+                entity.Property(e => e.Name).HasMaxLength(2000);
 
                 entity.Property(e => e.StartDate).HasColumnType("datetime");
 
-                entity.Property(e => e.Status).HasMaxLength(255);
+                entity.Property(e => e.Status).HasMaxLength(2000);
 
                 entity.Property(e => e.UpdateDate).HasColumnType("datetime");
 
@@ -436,9 +436,9 @@ namespace UPOD.REPOSITORIES.Models
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.Code).HasMaxLength(255);
+                entity.Property(e => e.Code).HasMaxLength(2000);
 
-                entity.Property(e => e.CancelReason).HasMaxLength(255);
+                entity.Property(e => e.CancelReason).HasMaxLength(2000);
 
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
@@ -487,12 +487,12 @@ namespace UPOD.REPOSITORIES.Models
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.Code).HasMaxLength(255);
+                entity.Property(e => e.Code).HasMaxLength(2000);
 
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
                 entity.Property(e => e.RoleName)
-                    .HasMaxLength(100)
+                    .HasMaxLength(2000)
                     .IsUnicode(false);
 
                 entity.Property(e => e.UpdateDate).HasColumnType("datetime");
@@ -504,13 +504,13 @@ namespace UPOD.REPOSITORIES.Models
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.Code).HasMaxLength(255);
+                entity.Property(e => e.Code).HasMaxLength(2000);
 
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
-                entity.Property(e => e.ServiceName).HasMaxLength(250);
+                entity.Property(e => e.ServiceName).HasMaxLength(2000);
 
-                entity.Property(e => e.Guideline).HasMaxLength(255);
+                entity.Property(e => e.Guideline).HasMaxLength(2000);
 
                 entity.Property(e => e.UpdateDate).HasColumnType("datetime");
             });
@@ -538,20 +538,20 @@ namespace UPOD.REPOSITORIES.Models
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.Address).HasMaxLength(200);
+                entity.Property(e => e.Address).HasMaxLength(2000);
 
-                entity.Property(e => e.Code).HasMaxLength(255);
+                entity.Property(e => e.Code).HasMaxLength(2000);
 
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
                 entity.Property(e => e.Email)
-                    .HasMaxLength(100)
+                    .HasMaxLength(2000)
                     .IsUnicode(false);
 
-                entity.Property(e => e.TechnicianName).HasMaxLength(100);
+                entity.Property(e => e.TechnicianName).HasMaxLength(2000);
 
                 entity.Property(e => e.Telephone)
-                    .HasMaxLength(20)
+                    .HasMaxLength(2000)
                     .IsUnicode(false);
 
                 entity.Property(e => e.UpdateDate).HasColumnType("datetime");
@@ -575,7 +575,7 @@ namespace UPOD.REPOSITORIES.Models
 
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
-                entity.Property(e => e.Solution).HasMaxLength(250);
+                entity.Property(e => e.Solution).HasMaxLength(2000);
 
                 entity.Property(e => e.UpdateDate).HasColumnType("datetime");
 
