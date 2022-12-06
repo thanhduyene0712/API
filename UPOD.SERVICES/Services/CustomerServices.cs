@@ -42,12 +42,9 @@ namespace UPOD.SERVICES.Services
         public async Task<ObjectModelResponse> ApproveRequestResolved(Guid id)
         {
             var request = await _context.Requests.Where(a => a.IsDelete == false && a.Id.Equals(id)).FirstOrDefaultAsync();
-            if (request != null)
-            {
-                request!.UpdateDate = DateTime.UtcNow.AddHours(7);
-                request!.RequestStatus = ProcessStatus.COMPLETED.ToString();
-                await _context.SaveChangesAsync();
-            }
+            request!.UpdateDate = DateTime.UtcNow.AddHours(7);
+            request!.RequestStatus = ProcessStatus.COMPLETED.ToString();
+            await _context.SaveChangesAsync();
             return new ObjectModelResponse(request!)
             {
                 Type = "Request"

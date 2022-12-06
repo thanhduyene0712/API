@@ -10,4 +10,8 @@ namespace UPOD.REPOSITORIES.RequestModels
     {
         public string? search { get; set; }
     }
+    public class FilterRequest
+    {
+        public string? task { get; set; }
+    }
 }

@@ -83,6 +83,19 @@ namespace UPOD.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpGet]
+        [Route("get_task_by_technician_id")]
+        public async Task<ActionResult<ResponseModel<TaskResponse>>> GetTask([FromQuery] PaginationRequest model, Guid id,int task, [FromQuery] FilterStatusRequest value)
+        {
+            try
+            {
+                return await _technician_sv.GetTask(model, id, task, value);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
         [HttpPost]
         [Route("create_technician")]
         public async Task<ActionResult<ObjectModelResponse>> CreateTechnician(TechnicianRequest model)
