@@ -282,30 +282,50 @@ namespace UPOD.SERVICES.Services
             {
                 if (task == 2)
                 {
-                    listTask.Add(new TaskResponse
+                    foreach (var item in maintenanceSchedules)
                     {
-                        maintain = maintenanceSchedules,
-                        request = null!
-                    });
+                        listTask.Add(new TaskResponse
+                        {
+                            task = "Maintenance Schedule",
+                            id = item.id,
+                            code = item.code,
+                            name = item.name,
+                            status = item.status,
+                            agency_name = item.agency.agency_name,
+                            customer_name = _context.Agencies.Where(a => a.Id.Equals(item.agency.id)).Select(a => a.Customer!.Name).FirstOrDefault(),
+                            created_date = item.create_date,
+                            update_date = item.update_date,
+                        });
+                    }
                     total = maintenanceSchedules.Count;
                 }
                 else if (task == 1)
                 {
-                    listTask.Add(new TaskResponse
+                    foreach (var item in requests)
                     {
-                        request = requests,
-                        maintain = null!
-                    });
-                    total = requests.Count;
+
+                        listTask.Add(new TaskResponse
+                        {
+                            task = "Request",
+                            id = item.id,
+                            code = item.code,
+                            name = item.request_name,
+                            status = item.request_status,
+                            agency_name = item.agency.agency_name,
+                            customer_name = _context.Agencies.Where(a => a.Id.Equals(item.agency.id)).Select(a => a.Customer!.Name).FirstOrDefault(),
+                            created_date = item.create_date,
+                            update_date = item.update_date,
+                        });
+                    }
                 }
                 else
                 {
-                    listTask.Add(new TaskResponse
-                    {
-                        request = requests,
-                        maintain = maintenanceSchedules
+                    //listTask.Add(new TaskResponse
+                    //{
+                    //    request = requests,
+                    //    maintain = maintenanceSchedules
 
-                    });
+                    //});
                     total = requests.Count + maintenanceSchedules.Count;
 
                 }

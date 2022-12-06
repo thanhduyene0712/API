@@ -756,6 +756,8 @@ namespace UPOD.SERVICES.Services
                         code = _context.Technicians.Where(a => a.IsDelete == false && a.Id.Equals(item.TechnicianId)).Select(a => a.Code).FirstOrDefault(),
                         technician_name = _context.Technicians.Where(a => a.IsDelete == false && a.Id.Equals(item.TechnicianId)).Select(a => a.TechnicianName).FirstOrDefault(),
                         number_of_requests = count,
+                        area = area!.AreaName,
+                        skills = _context.Skills.Where(a => a.TechnicianId.Equals(item!.TechnicianId)).Select(a => a.Service.ServiceName).ToList()!,
                     });
                 }
             }
@@ -779,6 +781,8 @@ namespace UPOD.SERVICES.Services
                         code = _context.Technicians.Where(a => a.IsDelete == false && a.Id.Equals(item.TechnicianId)).Select(a => a.Code).FirstOrDefault(),
                         technician_name = _context.Technicians.Where(a => a.IsDelete == false && a.Id.Equals(item.TechnicianId)).Select(a => a.TechnicianName).FirstOrDefault(),
                         number_of_requests = count,
+                        area = area!.AreaName,
+                        skills = _context.Skills.Where(a => a.TechnicianId.Equals(item!.TechnicianId)).Select(a => a.Service.ServiceName).ToList()!,
                     });
                 }
 

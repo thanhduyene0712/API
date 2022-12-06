@@ -8,7 +8,14 @@ namespace UPOD.REPOSITORIES.ResponseModels
 {
     public class TaskResponse
     {
-        public List<RequestResponse> request { get; set; } = null!;
-        public List<MaintenanceScheduleResponse> maintain { get; set; } = null!;
+        public string? task { get; set; }
+        public Guid id { get; set; }
+        public string? code { get; set; }
+        public string? name { get; set; }
+        public string? status { get; set; }
+        public string? customer_name { get; set; }
+        public string? agency_name { get; set; }
+        public DateTime? created_date { get; set; }
+        public DateTime? update_date { get; set; }
     }
 }
