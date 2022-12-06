@@ -35,6 +35,7 @@ namespace UPOD.SERVICES.Services
         Task<ResponseModel<RequestResponse>> GetListRequestsOfTechnicianAgency(PaginationRequest model, Guid tech_id, Guid agency_id, FilterStatusRequest value);
     }
 
+
     public class TechnicianServices : ITechnicianService
     {
         private readonly Database_UPODContext _context;
