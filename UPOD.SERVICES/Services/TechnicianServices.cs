@@ -299,6 +299,7 @@ namespace UPOD.SERVICES.Services
                         });
                     }
                     total = maintenanceSchedules.Count;
+                    listTask.OrderByDescending(a => a.update_date).Skip((model.PageNumber - 1) * model.PageSize).ToList();
                 }
                 else if (task == 1)
                 {
@@ -318,6 +319,8 @@ namespace UPOD.SERVICES.Services
                             update_date = item.update_date,
                         });
                     }
+                    total = requests.Count;
+                    listTask.OrderByDescending(a => a.update_date).Skip((model.PageNumber - 1) * model.PageSize).ToList();
                 }
                 else
                 {
@@ -352,14 +355,15 @@ namespace UPOD.SERVICES.Services
                             created_date = item.create_date,
                             update_date = item.update_date,
                         });
+
                     }
                     if (listRequest.Count > 0 && listMaintain.Count == 0)
                     {
-                        listTask = listRequest;
+                        listTask = listRequest.OrderByDescending(a => a.update_date).Skip((model.PageNumber - 1) * model.PageSize).ToList();
                     }
                     else if (listRequest.Count == 0 && listMaintain.Count > 0)
                     {
-                        listTask = listMaintain;
+                        listTask = listMaintain.OrderByDescending(a => a.update_date).Skip((model.PageNumber - 1) * model.PageSize).ToList();
                     }
                     else
                     {
