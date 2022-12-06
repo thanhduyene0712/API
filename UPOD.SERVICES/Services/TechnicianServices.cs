@@ -1398,6 +1398,7 @@ namespace UPOD.SERVICES.Services
                 message = "Successfully";
                 status = 200;
                 technician!.IsBusy = true;
+                await _context.SaveChangesAsync();
                 var currentTechnician = await _context.Technicians.Where(x => x.Id.Equals(request!.CurrentTechnicianId)).Select(a => new TechnicianOfRequestResponse
                 {
                     id = a.Id,
