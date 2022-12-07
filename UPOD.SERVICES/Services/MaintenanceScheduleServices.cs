@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Dynamic.Core;
 using UPOD.REPOSITORIES.Models;
@@ -256,9 +257,11 @@ namespace UPOD.SERVICES.Services
             var maintenanceSchedule = await _context.MaintenanceSchedules.Where(a => a.Id.Equals(id) && a.IsDelete == false).FirstOrDefaultAsync();
             var data = new MaintenanceScheduleResponse();
             TimeSpan? durationTime;
+            var result = "";
             if (maintenanceSchedule!.EndDate != null && maintenanceSchedule.StartDate != null)
             {
-                durationTime = maintenanceSchedule!.EndDate - maintenanceSchedule!.StartDate;
+                durationTime = maintenanceSchedule!.EndDate.Value.Subtract(maintenanceSchedule!.StartDate.Value);
+                result = string.Format("{0:D2}:{1:D2}:{2:D2}", durationTime.Value.Days, durationTime.Value.Hours, durationTime.Value.Minutes);
             }
             else
             {
@@ -277,7 +280,7 @@ namespace UPOD.SERVICES.Services
                 end_time = maintenanceSchedule.EndDate,
                 maintain_time = maintenanceSchedule.MaintainTime,
                 status = maintenanceSchedule.Status,
-                duration_time = durationTime,
+                duration_time = result,
                 contract = new ContractViewResponse
                 {
                     id = _context.Contracts.Where(x => x.Id.Equals(maintenanceSchedule.ContractId)).Select(a => a.Id).FirstOrDefault(),

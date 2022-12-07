@@ -13,7 +13,7 @@ namespace UPOD.REPOSITORIES.ResponseModels
         public DateTime? update_date { get; set; }
         public DateTime? start_time { get; set; }
         public DateTime? end_time { get; set; }
-        public TimeSpan? duration_time { get; set; }
+        public string? duration_time { get; set; }
         public string? code { get; set; }
         public string? status { get; set; }
         public ContractViewResponse contract { get; set; } = null!;

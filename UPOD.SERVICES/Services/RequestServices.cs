@@ -802,10 +802,13 @@ namespace UPOD.SERVICES.Services
             var request = await _context.Requests.Where(a => a.Id.Equals(id) && a.IsDelete == false).FirstOrDefaultAsync();
             var request_details = new RequestDetailsResponse();
             TimeSpan? durationTime;
+            var result = "";
             if (request!.EndTime != null && request.StartTime != null)
             {
-                durationTime = request!.EndTime - request!.StartTime;
-            }else
+                durationTime = request!.EndTime.Value.Subtract(request!.StartTime.Value);
+                result = string.Format("{0:D2}:{1:D2}:{2:D2}", durationTime.Value.Days, durationTime.Value.Hours, durationTime.Value.Minutes);
+            }
+            else
             {
                 durationTime = null;
             }
@@ -844,7 +847,7 @@ namespace UPOD.SERVICES.Services
                     is_system = a.IsSystem,
                     start_time = a.StartTime,
                     end_time = a.EndTime,
-                    duration_time = durationTime,
+                    duration_time = result,
                     cancel_reason = a.CancelReason,
                     reject_reason = a.ReasonReject,
                     description = a.RequestDesciption,
@@ -906,7 +909,7 @@ namespace UPOD.SERVICES.Services
                         service_name = _context.Services.Where(x => x.Id.Equals(a.ServiceId)).Select(a => a.ServiceName).FirstOrDefault(),
                         description = _context.Services.Where(x => x.Id.Equals(a.ServiceId)).Select(a => a.Description).FirstOrDefault(),
                     },
-                    duration_time = durationTime,
+                    duration_time = result,
                     start_time = a.StartTime,
                     end_time = a.EndTime,
                     cancel_reason = a.CancelReason,

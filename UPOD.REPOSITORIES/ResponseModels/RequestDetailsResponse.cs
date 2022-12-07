@@ -18,7 +18,7 @@ namespace UPOD.REPOSITORIES.ResponseModels
         public string? description { get; set; }
         public DateTime? create_date { get; set; }
         public DateTime? update_date { get; set; }
-        public TimeSpan? duration_time { get; set; }
+        public string? duration_time { get; set; }
         public DateTime? start_time { get; set; }
         public DateTime? end_time { get; set; }
         public bool? is_system { get; set; }
