@@ -804,7 +804,7 @@ namespace UPOD.SERVICES.Services
             TimeSpan? durationTime;
             if (request!.EndTime != null && request.StartTime != null)
             {
-                durationTime = request!.EndTime!.Value.TimeOfDay - request!.StartTime!.Value.TimeOfDay;
+                durationTime = request!.EndTime - request!.StartTime;
             }else
             {
                 durationTime = null;

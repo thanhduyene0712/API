@@ -255,6 +255,15 @@ namespace UPOD.SERVICES.Services
         {
             var maintenanceSchedule = await _context.MaintenanceSchedules.Where(a => a.Id.Equals(id) && a.IsDelete == false).FirstOrDefaultAsync();
             var data = new MaintenanceScheduleResponse();
+            TimeSpan? durationTime;
+            if (maintenanceSchedule!.EndDate != null && maintenanceSchedule.StartDate != null)
+            {
+                durationTime = maintenanceSchedule!.EndDate - maintenanceSchedule!.StartDate;
+            }
+            else
+            {
+                durationTime = null;
+            }
             data = new MaintenanceScheduleResponse
             {
                 id = maintenanceSchedule!.Id,
@@ -268,6 +277,7 @@ namespace UPOD.SERVICES.Services
                 end_time = maintenanceSchedule.EndDate,
                 maintain_time = maintenanceSchedule.MaintainTime,
                 status = maintenanceSchedule.Status,
+                duration_time = durationTime,
                 contract = new ContractViewResponse
                 {
                     id = _context.Contracts.Where(x => x.Id.Equals(maintenanceSchedule.ContractId)).Select(a => a.Id).FirstOrDefault(),
@@ -685,7 +695,10 @@ namespace UPOD.SERVICES.Services
                 maintenanceSchedule!.Description = model.description;
                 maintenanceSchedule!.MaintainTime = model.maintain_time;
                 maintenanceSchedule!.TechnicianId = model.technician_id;
-                maintenanceSchedule!.Status = ScheduleStatus.SCHEDULED.ToString();
+                if(model.maintain_time.Value.Date > maintenanceSchedule!.MaintainTime.Value.AddDays(2).Date)
+                {
+                    maintenanceSchedule!.Status = ScheduleStatus.SCHEDULED.ToString();
+                }
                 maintenanceSchedule.UpdateDate = DateTime.UtcNow.AddHours(7);
                 var rs = await _context.SaveChangesAsync();
                 if (rs > 0)
