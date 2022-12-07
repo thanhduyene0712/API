@@ -254,7 +254,7 @@ namespace UPOD.SERVICES.Services
             maintenanceReport!.Name = model.name;
             maintenanceReport!.MaintenanceScheduleId = model.maintenance_schedule_id;
             maintenanceReport!.UpdateDate = DateTime.UtcNow.AddHours(7);
-            maintenanceReport!.Status = ReportStatus.STABILIZED.ToString();
+            maintenanceReport!.Status = ReportStatus.PENDING.ToString();
             var maintenanceReportDevices = await _context.MaintenanceReportDevices.Where(a => a.MaintenanceReportId.Equals(id)).ToListAsync();
             if (model.device.Count == 0)
                 foreach (var item in maintenanceReportDevices)
@@ -347,7 +347,7 @@ namespace UPOD.SERVICES.Services
             }
             else
             {
-                maintenanceReport!.Status = ReportStatus.TROUBLED.ToString();
+                maintenanceReport!.Status = ReportStatus.PENDING.ToString();
                 var report_service_removes = await _context.MaintenanceReportServices.Where(a => a.MaintenanceReportId.Equals(maintenanceReport.Id)).ToListAsync();
                 foreach (var item in report_service_removes)
                 {
@@ -533,7 +533,7 @@ namespace UPOD.SERVICES.Services
                 CustomerId = _context.Agencies.Where(a => a.Id.Equals(agencyId)).Select(a => a.CustomerId).FirstOrDefault(),
                 CreateBy = _context.MaintenanceSchedules.Where(a => a.Id.Equals(model.maintenance_schedule_id)).Select(a => a.TechnicianId).FirstOrDefault(),
                 MaintenanceScheduleId = model.maintenance_schedule_id,
-                Status = ReportStatus.STABILIZED.ToString(),
+                Status = ReportStatus.PENDING.ToString(),
             };
             if (model.device.Count > 0)
             {
@@ -608,7 +608,7 @@ namespace UPOD.SERVICES.Services
                 maintenanceScheduleStatus!.EndDate = DateTime.UtcNow.AddHours(7);
                 await _context.MaintenanceReports.AddAsync(maintenanceReport);
                 var technician = await _context.Technicians.Where(x => x.Id.Equals(maintenanceReport!.CreateBy)).FirstOrDefaultAsync();
-                maintenanceReport!.Status = ReportStatus.TROUBLED.ToString();
+                maintenanceReport!.Status = ReportStatus.PENDING.ToString();
                 technician!.IsBusy = false;
                 foreach (var item in model.service)
                 {
