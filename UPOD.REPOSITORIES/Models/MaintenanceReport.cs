@@ -8,7 +8,6 @@ namespace UPOD.REPOSITORIES.Models
         public MaintenanceReport()
         {
             MaintenanceReportServices = new HashSet<MaintenanceReportService>();
-            MaintenanceReportDevices = new HashSet<MaintenanceReportDevice>();
         }
 
         public Guid Id { get; set; }
@@ -22,12 +21,12 @@ namespace UPOD.REPOSITORIES.Models
         public Guid? CreateBy { get; set; }
         public string? Status { get; set; }
         public string? Name { get; set; }
+        public bool? IsProcessed { get; set; }
 
         public virtual Agency? Agency { get; set; }
         public virtual Technician? CreateByNavigation { get; set; }
         public virtual Customer? Customer { get; set; }
         public virtual MaintenanceSchedule? MaintenanceSchedule { get; set; }
         public virtual ICollection<MaintenanceReportService> MaintenanceReportServices { get; set; }
-        public virtual ICollection<MaintenanceReportDevice> MaintenanceReportDevices { get; set; }
     }
 }

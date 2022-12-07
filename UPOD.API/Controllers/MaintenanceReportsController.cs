@@ -43,6 +43,19 @@ namespace UPOD.API.Controllers
             }
         }
         [HttpPost]
+        [Route("process_maintenance_report_by_report_id")]
+        public async Task<ActionResult<ResponseModel<RequestCreateResponse>>> ProcessMaintainReport(Guid report_id)
+        {
+            try
+            {
+                return await _maintenance_report_sv.ProcessMaintainReport(report_id);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpPost]
         [Route("create_maintenance_report")]
         public async Task<ActionResult<ObjectModelResponse>> CreateMaintenanceReport(MaintenanceReportRequest model)
         {

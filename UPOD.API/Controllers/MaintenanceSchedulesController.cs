@@ -63,6 +63,7 @@ namespace UPOD.API.Controllers
                 await _contract_sv.SetContractNotify();
                 await _request_Sv.WarningRequest();
                 await _request_Sv.CompletedRequest();
+                await _maintenanceReport_sv.CheckMaintenanceReport();
                 var timeShedule = DateTime.SpecifyKind(DateTime.UtcNow.AddMinutes(5), DateTimeKind.Utc);
                 BackgroundJob.Schedule(() => Notifications(), timeShedule);
                 return Ok();
@@ -159,6 +160,19 @@ namespace UPOD.API.Controllers
             try
             {
                 return await _maintenanceSchedule_sv.UpdateMaintenanceSchedule(id, model);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpPut]
+        [Route("accept_maintenance_schedule_by_id")]
+        public async Task<ActionResult<ObjectModelResponse>> AcceptMaintenanceSchedule(Guid id, Guid tech_id)
+        {
+            try
+            {
+                return await _maintenanceSchedule_sv.AcceptMaintenanceSchedule(id, tech_id);
             }
             catch (Exception ex)
             {

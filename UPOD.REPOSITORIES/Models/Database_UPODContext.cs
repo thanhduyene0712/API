@@ -30,7 +30,6 @@ namespace UPOD.REPOSITORIES.Models
         public virtual DbSet<MaintenanceReport> MaintenanceReports { get; set; } = null!;
         public virtual DbSet<MaintenanceReportService> MaintenanceReportServices { get; set; } = null!;
         public virtual DbSet<MaintenanceSchedule> MaintenanceSchedules { get; set; } = null!;
-        public virtual DbSet<MaintenanceReportDevice> MaintenanceReportDevices { get; set; } = null!;
         public virtual DbSet<Request> Requests { get; set; } = null!;
         public virtual DbSet<Role> Roles { get; set; } = null!;
         public virtual DbSet<Service> Services { get; set; } = null!;
@@ -363,33 +362,6 @@ namespace UPOD.REPOSITORIES.Models
                     .WithMany(p => p.MaintenanceReportServices)
                     .HasForeignKey(d => d.ServiceId)
                     .HasConstraintName("FK_MaintenanceReportService_Service");
-            });
-
-            modelBuilder.Entity<MaintenanceReportDevice>(entity =>
-            {
-                entity.ToTable("MaintenanceReportDevice");
-
-                entity.Property(e => e.Id).ValueGeneratedNever();
-
-                entity.Property(e => e.Description).HasMaxLength(2000);
-
-                entity.Property(e => e.Solution).HasMaxLength(2000);
-
-                entity.HasOne(d => d.Device)
-                   .WithMany(p => p.MaintenanceReportDevices)
-                   .HasForeignKey(d => d.DeviceId)
-                   .HasConstraintName("FK_MaintenanceReportDevice");
-
-                entity.HasOne(d => d.Service)
-                   .WithMany(p => p.MaintenanceReportDevices)
-                   .HasForeignKey(d => d.ServiceId)
-                   .HasConstraintName("FK_MaintenanceReportDevice_Service");
-
-                entity.HasOne(d => d.MaintenanceReport)
-                    .WithMany(p => p.MaintenanceReportDevices)
-                    .HasForeignKey(d => d.MaintenanceReportId)
-                    .HasConstraintName("FK_MaintenanceReportDevice_MaintenanceReport");
-
             });
 
             modelBuilder.Entity<MaintenanceSchedule>(entity =>

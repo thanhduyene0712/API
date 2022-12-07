@@ -10,7 +10,6 @@ namespace UPOD.REPOSITORIES.RequestModels
     {
         public string? name { get; set; }
         public Guid? maintenance_schedule_id { get; set; }
-        public List<MaintenanceReportDeviceRequest> device { get; set; } = null!;
         public List<MaintenanceReportServiceRequest> service { get; set; } = null!;
     }
 }

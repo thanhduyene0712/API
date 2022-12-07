@@ -15,6 +15,7 @@ namespace UPOD.REPOSITORIES.ResponseViewModel
         public string? service_name { get; set; }
         public string? description { get; set; }
         public bool? created { get; set; }
+        public bool? is_resolved { get; set; }
         public List<string>? img { get; set; }
     }
 }

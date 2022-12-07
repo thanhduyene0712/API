@@ -10,6 +10,7 @@ namespace UPOD.REPOSITORIES.RequestModels
     {
         public Guid? service_id { get; set; }
         public string? Description { get; set; }
+        public bool? is_resolved { get; set; }
         public List<string>? img { get; set; }
     }
 }

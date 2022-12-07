@@ -29,7 +29,7 @@ namespace UPOD.SERVICES.Services
         Task<ObjectModelResponse> ApproveContract(Guid cus_id, Guid con_id);
         Task<ObjectModelResponse> RejectContract(Guid cus_id, Guid con_id, ContractRejectRequest model);
         Task<ObjectModelResponse> ApproveRequestResolved(Guid id);
-        Task<ResponseModel<RequestCreateResponse>> ApproveMaintainReport(Guid report_id);
+ 
     }
 
     public class CustomerServices : ICustomerService
@@ -51,163 +51,7 @@ namespace UPOD.SERVICES.Services
             };
         }
 
-        public async Task<ResponseModel<RequestCreateResponse>> ApproveMaintainReport(Guid report_id)
-        {
-            var reportSchedule = await _context.MaintenanceReports.Where(a => a.IsDelete == false && a.Id.Equals(report_id)).FirstOrDefaultAsync();
-            var reportServices = await _context.MaintenanceReportServices.Where(a => a.MaintenanceReportId.Equals(report_id)).ToListAsync();
-            reportSchedule!.Status = ReportStatus.COMPLETED.ToString();
-            reportSchedule.UpdateDate = DateTime.UtcNow.AddHours(7);
-            var requests = new List<RequestCreateResponse>();
-            if (reportServices.Count > 0)
-            {
-                var num = await GetLastCode2();
-                foreach (var item in reportServices)
-                {
-                    var request_id = Guid.NewGuid();
-                    while (true)
-                    {
-                        var request_dup = await _context.Requests.Where(x => x.Id.Equals(request_id)).FirstOrDefaultAsync();
-                        if (request_dup == null)
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            request_id = Guid.NewGuid();
-                        }
-                    }
-                    var code = CodeHelper.GeneratorCode("RE", num++);
-                    while (true)
-                    {
-                        var code_dup = await _context.Requests.Where(a => a.Code.Equals(code)).FirstOrDefaultAsync();
-                        if (code_dup == null)
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            code = "RE-" + num++.ToString();
-                        }
-                    }
-                    var contracts = await _context.Contracts.Where(a => a.CustomerId.Equals(reportSchedule.CustomerId)).ToListAsync();
-                    Guid? contract_id = null;
-                    foreach (var item1 in contracts)
-                    {
-                        var contract_services = await _context.ContractServices.Where(a => a.ContractId.Equals(item1.Id)).ToListAsync();
-                        foreach (var item2 in contract_services)
-                        {
-                            if (item2.ServiceId.Equals(item.ServiceId))
-                            {
-                                contract_id = item2.ContractId;
-                            }
-                        }
-                    }
-                    var agency = await _context.Agencies.Where(a => a.Id.Equals(reportSchedule!.AgencyId)).FirstOrDefaultAsync();
-                    var area = await _context.Areas.Where(a => a.Id.Equals(agency!.AreaId)).FirstOrDefaultAsync();
-                    var service = await _context.Services.Where(a => a.Id.Equals(item!.ServiceId)).FirstOrDefaultAsync();
-                    var technicians = new List<TechnicianOfRequestResponse>();
-                    DateTime date = DateTime.UtcNow.AddHours(7);
-                    var total = await _context.Skills.Where(a => a.ServiceId.Equals(service!.Id)
-                    && a.Technician.AreaId.Equals(area!.Id)
-                    && a.Technician.IsBusy == false
-                    && a.Technician.IsDelete == false).ToListAsync();
-                    if (total.Count > 0)
-                    {
-                        total = await _context.Skills.Where(a => a.ServiceId.Equals(service!.Id)
-                        && a.Technician.AreaId.Equals(area!.Id)
-                        && a.Technician.IsBusy == false
-                        && a.Technician.IsDelete == false).ToListAsync();
-                        foreach (var item3 in total)
-                        {
-                            date = date.AddDays((-date.Day) + 1).Date;
-                            var requestsOfTechnician = await _context.Requests.Where(a => a.IsDelete == false
-                            && a.CurrentTechnicianId.Equals(item3.TechnicianId)
-                            && a.RequestStatus.Equals("COMPLETED")
-                            && a.CreateDate!.Value.Date >= date
-                            && a.CreateDate!.Value.Date <= DateTime.UtcNow.AddHours(7)).ToListAsync();
-                            var count = requestsOfTechnician.Count;
-                            technicians.Add(new TechnicianOfRequestResponse
-                            {
-                                id = item3.TechnicianId,
-                                code = _context.Technicians.Where(a => a.IsDelete == false && a.Id.Equals(item3.TechnicianId)).Select(a => a.Code).FirstOrDefault(),
-                                technician_name = _context.Technicians.Where(a => a.IsDelete == false && a.Id.Equals(item3.TechnicianId)).Select(a => a.TechnicianName).FirstOrDefault(),
-                                number_of_requests = count,
-                            });
-                        }
-                    }
-                    else
-                    {
-                        total = await _context.Skills.Where(a => a.ServiceId.Equals(service!.Id)
-                        && a.Technician.IsBusy == false
-                        && a.Technician.IsDelete == false).ToListAsync();
-                        foreach (var item3 in total)
-                        {
-                            date = date.AddDays((-date.Day) + 1).Date;
-                            var requestsOfTechnician = await _context.Requests.Where(a => a.IsDelete == false
-                            && a.CurrentTechnicianId.Equals(item3.TechnicianId)
-                            && a.RequestStatus.Equals("COMPLETED")
-                            && a.CreateDate!.Value.Date >= date
-                            && a.CreateDate!.Value.Date <= DateTime.UtcNow.AddHours(7)).ToListAsync();
-                            var count = requestsOfTechnician.Count;
-                            technicians.Add(new TechnicianOfRequestResponse
-                            {
-                                id = item3.TechnicianId,
-                                code = _context.Technicians.Where(a => a.IsDelete == false && a.Id.Equals(item3.TechnicianId)).Select(a => a.Code).FirstOrDefault(),
-                                technician_name = _context.Technicians.Where(a => a.IsDelete == false && a.Id.Equals(item3.TechnicianId)).Select(a => a.TechnicianName).FirstOrDefault(),
-                                number_of_requests = count,
-                            });
-                        }
-
-                    }
-                    technicians.OrderBy(a => a.number_of_requests).ToList();
-                    item!.Created = true;
-                    item!.RequestId = request_id!;
-                    var requestNew = new Request
-                    {
-                        Id = request_id,
-                        Code = code,
-                        RequestName = "Request auto: " + reportSchedule.Name,
-                        CustomerId = reportSchedule.CustomerId,
-                        ServiceId = item.ServiceId,
-                        AgencyId = reportSchedule.AgencyId,
-                        RequestDesciption = item.Description,
-                        RequestStatus = ProcessStatus.PREPARING.ToString(),
-                        ReasonReject = null,
-                        CreateDate = DateTime.UtcNow.AddHours(7),
-                        UpdateDate = DateTime.UtcNow.AddHours(7),
-                        IsDelete = false,
-                        Feedback = null,
-                        Rating = 0,
-                        CurrentTechnicianId = technicians.Select(a => a.id).FirstOrDefault(),
-                        StartTime = DateTime.UtcNow.AddHours(7),
-                        EndTime = null,
-                        AdminId = null,
-                        ContractId = contract_id,
-                        IsSystem = true,
-                    };
-                    await _context.Requests.AddAsync(requestNew);
-                    requests.Add(new RequestCreateResponse
-                    {
-                        id = requestNew.Id,
-                        code = requestNew.Code,
-                        request_name = requestNew.RequestName,
-                        request_description = requestNew.RequestDesciption,
-                        phone = _context.Agencies.Where(x => x.Id.Equals(requestNew.AgencyId)).Select(x => x.Telephone).FirstOrDefault(),
-                        agency_name = _context.Agencies.Where(x => x.Id.Equals(requestNew.AgencyId)).Select(x => x.AgencyName).FirstOrDefault(),
-                        customer_name = _context.Customers.Where(x => x.Id.Equals(requestNew.CustomerId)).Select(x => x.Name).FirstOrDefault(),
-                        service_name = _context.Services.Where(x => x.Id.Equals(requestNew.ServiceId)).Select(x => x.ServiceName).FirstOrDefault(),
-                        technician_name = _context.Technicians.Where(x => x.Id.Equals(requestNew.CurrentTechnicianId)).Select(x => x.TechnicianName).FirstOrDefault(),
-                    });
-                }
-            }
-            await _context.SaveChangesAsync();
-            return new ResponseModel<RequestCreateResponse>(requests)
-            {
-                Type = "Requests",
-                Total = requests.Count,
-
-            };
-        }
+        
         public async Task<ObjectModelResponse> RejectContract(Guid cus_id, Guid con_id, ContractRejectRequest model)
         {
             var contract = await _context.Contracts.Where(a => a.IsDelete == false
@@ -1255,11 +1099,7 @@ namespace UPOD.SERVICES.Services
                 Type = "Customer"
             };
         }
-        private async Task<int> GetLastCode2()
-        {
-            var request = await _context.Requests.OrderBy(x => x.Code).LastOrDefaultAsync();
-            return CodeHelper.StringToInt(request!.Code!);
-        }
+
         private async Task<int> GetLastCode()
         {
             var customer = await _context.Customers.OrderBy(x => x.Code).LastOrDefaultAsync();
