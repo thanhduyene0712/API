@@ -294,6 +294,7 @@ namespace UPOD.SERVICES.Services
                             status = item.status,
                             agency_name = item.agency.agency_name,
                             customer_name = _context.Agencies.Where(a => a.Id.Equals(item.agency.id)).Select(a => a.Customer!.Name).FirstOrDefault(),
+                            address = item.agency.address,
                             created_date = item.create_date,
                             update_date = item.update_date,
                         });
@@ -315,6 +316,7 @@ namespace UPOD.SERVICES.Services
                             status = item.request_status,
                             agency_name = item.agency.agency_name,
                             customer_name = item.customer.cus_name,
+                            address = item.agency.address,
                             created_date = item.create_date,
                             update_date = item.update_date,
                         });
@@ -337,6 +339,7 @@ namespace UPOD.SERVICES.Services
                             status = item.request_status,
                             agency_name = item.agency.agency_name,
                             customer_name = item.customer.cus_name,
+                            address = item.agency.address,
                             created_date = item.create_date,
                             update_date = item.update_date,
                         });
@@ -352,6 +355,7 @@ namespace UPOD.SERVICES.Services
                             status = item.status,
                             agency_name = item.agency.agency_name,
                             customer_name = _context.Agencies.Where(a => a.Id.Equals(item.agency.id)).Select(a => a.Customer!.Name).FirstOrDefault(),
+                            address = item.agency.address,
                             created_date = item.create_date,
                             update_date = item.update_date,
                         });

@@ -16,6 +16,7 @@ namespace UPOD.REPOSITORIES.ResponseModels
         public string? status { get; set; }
         public string? customer_name { get; set; }
         public string? agency_name { get; set; }
+        public string? address { get; set; }
         public DateTime? created_date { get; set; }
         public DateTime? update_date { get; set; }
         public override bool Equals(object? obj)
