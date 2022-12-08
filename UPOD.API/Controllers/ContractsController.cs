@@ -37,6 +37,19 @@ namespace UPOD.API.Controllers
 
 
         [HttpGet]
+        [Route("get_service_contract_by_id")]
+        public async Task<ActionResult<ResponseModel<ServiceResponse>>> GetServiceByContractId(Guid Id)
+        {
+            try
+            {
+                return await _contract_service_sv.GetServiceByContractId(Id);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet]
         [Route("get_contract_details_by_id")]
         public async Task<ActionResult<ObjectModelResponse>> GetDetailsContract([FromQuery] Guid Id)
         {

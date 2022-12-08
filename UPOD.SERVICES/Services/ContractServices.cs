@@ -19,6 +19,7 @@ namespace UPOD.SERVICES.Services
         Task<ObjectModelResponse> GetDetailsContract(Guid id);
         Task<ObjectModelResponse> DisableContract(Guid id);
         Task<ObjectModelResponse> TerminationContract(Guid id, ContractTermanationRequest model);
+        Task<ResponseModel<ServiceResponse>> GetServiceByContractId(Guid id);
         Task SetContractNotify();
     }
 
@@ -29,7 +30,27 @@ namespace UPOD.SERVICES.Services
         {
             _context = context;
         }
+        public async Task<ResponseModel<ServiceResponse>> GetServiceByContractId(Guid id)
+        {
 
+            var services = await _context.ContractServices.Where(x => x.Contract!.Id.Equals(id)).Select(x => new ServiceResponse
+            {
+                id = x.ServiceId,
+                code = x.Service!.Code,
+                service_name = x.Service!.ServiceName,
+                description = x.Service!.Description,
+                create_date = x.Service!.CreateDate,
+                update_date = x.Service!.UpdateDate,
+                guideline = x.Service!.Guideline,
+                is_delete = x.Service!.IsDelete,
+            }).Distinct().ToListAsync();
+
+            return new ResponseModel<ServiceResponse>(services)
+            {
+                Total = services.Count,
+                Type = "Services"
+            };
+        }
         public async Task SetContractNotify()
         {
 
