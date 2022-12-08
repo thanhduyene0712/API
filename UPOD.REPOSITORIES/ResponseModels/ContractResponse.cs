@@ -24,6 +24,7 @@ namespace UPOD.REPOSITORIES.ResponseModels
         public string? description { get; set; }
         public string? reject_reason { get; set; }
         public string? terminal_content { get; set; }
+        public DateTime? terminal_time { get; set; }
         public int? frequency_maintain_time { get; set; }
         public List<string>? img { get; set; }
         public CustomerViewResponse customer { get; set; } = null!;

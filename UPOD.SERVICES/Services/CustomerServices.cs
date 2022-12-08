@@ -144,7 +144,7 @@ namespace UPOD.SERVICES.Services
                 if (contract.FrequencyMaintainTime > 0)
                 {
                     var lastTime = contract.EndDate - contract.StartDate;
-                    var lastDay = lastTime!.Value.Days - 5;
+                    var lastDay = lastTime!.Value.Days - 10;
                     var listAgency = await _context.Agencies.Where(a => a.CustomerId.Equals(contract.CustomerId) && a.IsDelete == false).ToListAsync();
                     var code_number1 = await GetLastCode1();
                     var maintenanceTime = lastDay / contract.FrequencyMaintainTime;

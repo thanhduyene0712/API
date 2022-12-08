@@ -239,6 +239,7 @@ namespace UPOD.SERVICES.Services
                     address = _context.Customers.Where(x => x.Id.Equals(a.CustomerId)).Select(x => x.Address).FirstOrDefault(),
                     mail = _context.Customers.Where(x => x.Id.Equals(a.CustomerId)).Select(x => x.Mail).FirstOrDefault(),
                 },
+                terminal_time = a.TerminalTime,
                 terminal_content = a.TerminalContent,
                 img = _context.Images.Where(d => d.CurrentObject_Id.Equals(a.Id) && d.ObjectName!.Equals(ObjectName.CON.ToString())).Select(x => x.Link).ToList()!,
                 start_date = a.StartDate,
@@ -269,62 +270,83 @@ namespace UPOD.SERVICES.Services
         public async Task<ObjectModelResponse> TerminationContract(Guid id, ContractTermanationRequest model)
         {
             var contract = await _context.Contracts.Where(a => a.IsDelete == false && a.Id.Equals(id)).FirstOrDefaultAsync();
-            contract!.TerminalTime = DateTime.UtcNow.AddHours(7);
-            contract!.TerminalContent = model.terminal_content;
-            contract!.IsExpire = true;
-            contract!.UpdateDate = DateTime.UtcNow.AddHours(7);
-            var schedule = await _context.MaintenanceSchedules.Where(a => a.IsDelete == false && a.ContractId.Equals(contract.Id)).ToListAsync();
-            foreach (var item in schedule)
+            var data = new ContractResponse();
+            var message = "blank";
+            var status = 500;
+            var checkSchedule = await _context.MaintenanceSchedules.Where(a => a.IsDelete == false
+            && a.ContractId.Equals(contract!.Id)
+            && (a.Status!.Equals("WARNING")
+            || a.Status.Equals("PREPARING")
+            || a.Status.Equals("NOTIFIED")
+            || a.Status.Equals("MAINTAINING"))).ToListAsync();
+            if (checkSchedule.Count > 0)
             {
-                if (item.Status != "COMPLETED" && item.Status != "MISSED")
+                message = "Ongoing Maintenance Schedules need to be completed";
+                status = 400;
+            }
+            else
+            {
+                message = "Successfully";
+                status = 200;
+                contract!.TerminalTime = DateTime.UtcNow.AddHours(7);
+                contract!.TerminalContent = model.terminal_content;
+                contract!.IsExpire = true;
+                contract!.UpdateDate = DateTime.UtcNow.AddHours(7);
+                var schedules = await _context.MaintenanceSchedules.Where(a => a.IsDelete == false && a.ContractId.Equals(contract.Id)).ToListAsync();
+                foreach (var item in schedules)
                 {
-                    item.IsDelete = true;
+                    if (item.Status != "COMPLETED" && item.Status != "MISSED")
+                    {
+                        item.IsDelete = true;
+                    }
+                }
+                var rs = await _context.SaveChangesAsync();
+                if (rs > 0)
+                {
+
+                    data = new ContractResponse
+                    {
+                        id = contract!.Id,
+                        code = contract.Code,
+                        contract_name = contract.ContractName,
+                        customer = new CustomerViewResponse
+                        {
+                            id = _context.Customers.Where(x => x.Id.Equals(contract.CustomerId)).Select(x => x.Id).FirstOrDefault(),
+                            code = _context.Customers.Where(x => x.Id.Equals(contract.CustomerId)).Select(x => x.Code).FirstOrDefault(),
+                            cus_name = _context.Customers.Where(x => x.Id.Equals(contract.CustomerId)).Select(x => x.Name).FirstOrDefault(),
+                            description = _context.Customers.Where(x => x.Id.Equals(contract.CustomerId)).Select(x => x.Description).FirstOrDefault(),
+                            phone = _context.Customers.Where(x => x.Id.Equals(contract.CustomerId)).Select(x => x.Phone).FirstOrDefault(),
+                            address = _context.Customers.Where(x => x.Id.Equals(contract.CustomerId)).Select(x => x.Address).FirstOrDefault(),
+                            mail = _context.Customers.Where(x => x.Id.Equals(contract.CustomerId)).Select(x => x.Mail).FirstOrDefault(),
+                        },
+                        reject_reason = contract.RejectReason,
+                        is_accepted = contract.IsAccepted,
+                        start_date = contract.StartDate,
+                        end_date = contract.EndDate,
+                        is_delete = contract.IsDelete,
+                        create_date = contract.CreateDate,
+                        update_date = contract.UpdateDate,
+                        contract_price = contract.ContractPrice,
+                        description = contract.Description,
+                        is_expire = contract.IsExpire,
+                        attachment = contract.Attachment,
+                        terminal_content = contract.TerminalContent,
+                        frequency_maintain_time = contract.FrequencyMaintainTime,
+                        service = _context.ContractServices.Where(x => x.ContractId.Equals(contract.Id)).Select(x => new ServiceViewResponse
+                        {
+                            id = x.ServiceId,
+                            code = x.Service!.Code,
+                            service_name = x.Service!.ServiceName,
+                            description = x.Service!.Description,
+                        }).ToList(),
+                    };
                 }
             }
-            var data = new ContractResponse();
-            var rs = await _context.SaveChangesAsync();
-            if (rs > 0)
-            {
 
-                data = new ContractResponse
-                {
-                    id = contract!.Id,
-                    code = contract.Code,
-                    contract_name = contract.ContractName,
-                    customer = new CustomerViewResponse
-                    {
-                        id = _context.Customers.Where(x => x.Id.Equals(contract.CustomerId)).Select(x => x.Id).FirstOrDefault(),
-                        code = _context.Customers.Where(x => x.Id.Equals(contract.CustomerId)).Select(x => x.Code).FirstOrDefault(),
-                        cus_name = _context.Customers.Where(x => x.Id.Equals(contract.CustomerId)).Select(x => x.Name).FirstOrDefault(),
-                        description = _context.Customers.Where(x => x.Id.Equals(contract.CustomerId)).Select(x => x.Description).FirstOrDefault(),
-                        phone = _context.Customers.Where(x => x.Id.Equals(contract.CustomerId)).Select(x => x.Phone).FirstOrDefault(),
-                        address = _context.Customers.Where(x => x.Id.Equals(contract.CustomerId)).Select(x => x.Address).FirstOrDefault(),
-                        mail = _context.Customers.Where(x => x.Id.Equals(contract.CustomerId)).Select(x => x.Mail).FirstOrDefault(),
-                    },
-                    reject_reason = contract.RejectReason,
-                    is_accepted = contract.IsAccepted,
-                    start_date = contract.StartDate,
-                    end_date = contract.EndDate,
-                    is_delete = contract.IsDelete,
-                    create_date = contract.CreateDate,
-                    update_date = contract.UpdateDate,
-                    contract_price = contract.ContractPrice,
-                    description = contract.Description,
-                    is_expire = contract.IsExpire,
-                    attachment = contract.Attachment,
-                    terminal_content = contract.TerminalContent,
-                    frequency_maintain_time = contract.FrequencyMaintainTime,
-                    service = _context.ContractServices.Where(x => x.ContractId.Equals(contract.Id)).Select(x => new ServiceViewResponse
-                    {
-                        id = x.ServiceId,
-                        code = x.Service!.Code,
-                        service_name = x.Service!.ServiceName,
-                        description = x.Service!.Description,
-                    }).ToList(),
-                };
-            }
             return new ObjectModelResponse(data!)
             {
+                Status = status,
+                Message = message,
                 Type = "Contract",
             };
         }
@@ -590,7 +612,7 @@ namespace UPOD.SERVICES.Services
                     _context.ContractServices.Add(contract_service);
                 }
 
-                if(model.img!.Count > 0)
+                if (model.img!.Count > 0)
                 {
                     foreach (var item in model.img!)
                     {
