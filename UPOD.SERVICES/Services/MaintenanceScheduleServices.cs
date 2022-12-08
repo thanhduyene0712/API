@@ -301,7 +301,16 @@ namespace UPOD.SERVICES.Services
                     code = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Code).FirstOrDefault(),
                     agency_name = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.AgencyName).FirstOrDefault(),
                     address = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Address).FirstOrDefault(),
-                    phone = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Telephone).FirstOrDefault()
+                    phone = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Telephone).FirstOrDefault(),
+                    manager_name = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.ManagerName).FirstOrDefault(),
+                },
+                customer = new CustomerViewResponse
+                {
+                    id = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.CustomerId).FirstOrDefault(),
+                    code = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Customer!.Code).FirstOrDefault(),
+                    cus_name = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Customer!.Name).FirstOrDefault(),
+                    address = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Customer!.Address).FirstOrDefault(),
+                    phone = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Customer!.Phone).FirstOrDefault(),
                 }
             };
 
@@ -396,7 +405,16 @@ namespace UPOD.SERVICES.Services
                         code = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Code).FirstOrDefault(),
                         agency_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.AgencyName).FirstOrDefault(),
                         address = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Address).FirstOrDefault(),
-                        phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Telephone).FirstOrDefault()
+                        phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Telephone).FirstOrDefault(),
+                        manager_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.ManagerName).FirstOrDefault(),
+                    },
+                    customer = new CustomerViewResponse
+                    {
+                        id = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.CustomerId).FirstOrDefault(),
+                        code = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Code).FirstOrDefault(),
+                        cus_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Name).FirstOrDefault(),
+                        address = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Address).FirstOrDefault(),
+                        phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Phone).FirstOrDefault(),
                     }
                 }).OrderByDescending(a => a.update_date).Skip((model.PageNumber - 1) * model.PageSize).Take(model.PageSize).ToListAsync();
             }
@@ -456,7 +474,16 @@ namespace UPOD.SERVICES.Services
                          code = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Code).FirstOrDefault(),
                          agency_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.AgencyName).FirstOrDefault(),
                          address = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Address).FirstOrDefault(),
-                         phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Telephone).FirstOrDefault()
+                         phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Telephone).FirstOrDefault(),
+                         manager_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.ManagerName).FirstOrDefault(),
+                     },
+                     customer = new CustomerViewResponse
+                     {
+                         id = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.CustomerId).FirstOrDefault(),
+                         code = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Code).FirstOrDefault(),
+                         cus_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Name).FirstOrDefault(),
+                         address = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Address).FirstOrDefault(),
+                         phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Phone).FirstOrDefault(),
                      }
                  }).OrderByDescending(a => a.update_date).Skip((model.PageNumber - 1) * model.PageSize).Take(model.PageSize).ToListAsync();
             }
@@ -502,7 +529,16 @@ namespace UPOD.SERVICES.Services
                         code = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Code).FirstOrDefault(),
                         agency_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.AgencyName).FirstOrDefault(),
                         address = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Address).FirstOrDefault(),
-                        phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Telephone).FirstOrDefault()
+                        phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Telephone).FirstOrDefault(),
+                        manager_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.ManagerName).FirstOrDefault(),
+                    },
+                    customer = new CustomerViewResponse
+                    {
+                        id = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.CustomerId).FirstOrDefault(),
+                        code = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Code).FirstOrDefault(),
+                        cus_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Name).FirstOrDefault(),
+                        address = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Address).FirstOrDefault(),
+                        phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Phone).FirstOrDefault(),
                     }
                 }).OrderByDescending(a => a.update_date).Skip((model.PageNumber - 1) * model.PageSize).Take(model.PageSize).ToListAsync();
             }
@@ -562,7 +598,16 @@ namespace UPOD.SERVICES.Services
                          code = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Code).FirstOrDefault(),
                          agency_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.AgencyName).FirstOrDefault(),
                          address = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Address).FirstOrDefault(),
-                         phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Telephone).FirstOrDefault()
+                         phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Telephone).FirstOrDefault(),
+                         manager_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.ManagerName).FirstOrDefault(),
+                     },
+                     customer = new CustomerViewResponse
+                     {
+                         id = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.CustomerId).FirstOrDefault(),
+                         code = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Code).FirstOrDefault(),
+                         cus_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Name).FirstOrDefault(),
+                         address = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Address).FirstOrDefault(),
+                         phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Phone).FirstOrDefault(),
                      }
                  }).OrderByDescending(a => a.update_date).Skip((model.PageNumber - 1) * model.PageSize).Take(model.PageSize).ToListAsync();
 
@@ -607,8 +652,17 @@ namespace UPOD.SERVICES.Services
                         code = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Code).FirstOrDefault(),
                         agency_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.AgencyName).FirstOrDefault(),
                         address = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Address).FirstOrDefault(),
-                        phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Telephone).FirstOrDefault()
+                        phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Telephone).FirstOrDefault(),
+                        manager_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.ManagerName).FirstOrDefault(),
                     },
+                    customer = new CustomerViewResponse
+                    {
+                        id = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.CustomerId).FirstOrDefault(),
+                        code = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Code).FirstOrDefault(),
+                        cus_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Name).FirstOrDefault(),
+                        address = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Address).FirstOrDefault(),
+                        phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Phone).FirstOrDefault(),
+                    }
 
                 }).OrderByDescending(a => a.update_date).Skip((model.PageNumber - 1) * model.PageSize).Take(model.PageSize).ToListAsync();
             }
@@ -669,7 +723,16 @@ namespace UPOD.SERVICES.Services
                          code = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Code).FirstOrDefault(),
                          agency_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.AgencyName).FirstOrDefault(),
                          address = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Address).FirstOrDefault(),
-                         phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Telephone).FirstOrDefault()
+                         phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Telephone).FirstOrDefault(),
+                         manager_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.ManagerName).FirstOrDefault(),
+                     },
+                     customer = new CustomerViewResponse
+                     {
+                         id = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.CustomerId).FirstOrDefault(),
+                         code = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Code).FirstOrDefault(),
+                         cus_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Name).FirstOrDefault(),
+                         address = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Address).FirstOrDefault(),
+                         phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Phone).FirstOrDefault(),
                      }
                  }).OrderByDescending(a => a.update_date).Skip((model.PageNumber - 1) * model.PageSize).Take(model.PageSize).ToListAsync();
 
@@ -733,7 +796,16 @@ namespace UPOD.SERVICES.Services
                             code = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Code).FirstOrDefault(),
                             agency_name = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.AgencyName).FirstOrDefault(),
                             address = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Address).FirstOrDefault(),
-                            phone = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Telephone).FirstOrDefault()
+                            phone = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Telephone).FirstOrDefault(),
+                            manager_name = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.ManagerName).FirstOrDefault(),
+                        },
+                        customer = new CustomerViewResponse
+                        {
+                            id = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.CustomerId).FirstOrDefault(),
+                            code = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Customer!.Code).FirstOrDefault(),
+                            cus_name = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Customer!.Name).FirstOrDefault(),
+                            address = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Customer!.Address).FirstOrDefault(),
+                            phone = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Customer!.Phone).FirstOrDefault(),
                         }
                     };
                 }
@@ -781,7 +853,16 @@ namespace UPOD.SERVICES.Services
                         code = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Code).FirstOrDefault(),
                         agency_name = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.AgencyName).FirstOrDefault(),
                         address = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Address).FirstOrDefault(),
-                        phone = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Telephone).FirstOrDefault()
+                        phone = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Telephone).FirstOrDefault(),
+                        manager_name = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.ManagerName).FirstOrDefault(),
+                    },
+                    customer = new CustomerViewResponse
+                    {
+                        id = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.CustomerId).FirstOrDefault(),
+                        code = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Customer!.Code).FirstOrDefault(),
+                        cus_name = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Customer!.Name).FirstOrDefault(),
+                        address = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Customer!.Address).FirstOrDefault(),
+                        phone = _context.Agencies.Where(x => x.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.Customer!.Phone).FirstOrDefault(),
                     }
                 };
             }

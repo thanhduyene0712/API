@@ -11,7 +11,7 @@ namespace UPOD.REPOSITORIES.ResponseViewModel
         public Guid? id { get; set; }
         public string? code { get; set; }
         public string? agency_name { get; set; }
-
+        public string? manager_name { get; set; }
         public string? phone { get; set; }
         public string? address { get; set; }
     }

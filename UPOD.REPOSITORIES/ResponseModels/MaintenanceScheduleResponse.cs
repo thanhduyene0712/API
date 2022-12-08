@@ -19,5 +19,6 @@ namespace UPOD.REPOSITORIES.ResponseModels
         public ContractViewResponse contract { get; set; } = null!;
         public TechnicianViewResponse technician { get; set; } = null!;
         public AgencyViewResponse agency { get; set; } = null!;
+        public CustomerViewResponse customer { get; set; } = null!;
     }
 }
