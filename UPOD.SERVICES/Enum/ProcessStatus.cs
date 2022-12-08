@@ -15,7 +15,6 @@ namespace UPOD.SERVICES.Enum
         RESOLVING,
         RESOLVED,
         CANCELED,
-        EDITING,
         COMPLETED,
         WARNING,
     }

@@ -210,19 +210,6 @@ namespace UPOD.API.Controllers
             }
         }
         [HttpPut]
-        [Route("reopen_request_by_id")]
-        public async Task<ActionResult<ObjectModelResponse>> ReOpenRequest(Guid id)
-        {
-            try
-            {
-                return await _request_sv.ReOpenRequest(id);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-        [HttpPut]
         [Route("cancel_request_by_id")]
         public async Task<ActionResult<ObjectModelResponse>> CancelRequest(Guid id, RejectRequest model)
 

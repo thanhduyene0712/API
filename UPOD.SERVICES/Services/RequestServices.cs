@@ -25,7 +25,6 @@ namespace UPOD.SERVICES.Services
         Task<ResponseModel<DeviceResponse>> GetDeviceRequest(PaginationRequest model, Guid id);
         Task<ObjectModelResponse> CreateRequestByAdmin(RequestAdminRequest model);
         Task<ObjectModelResponse> RejectRequest(Guid id, RejectRequest value);
-        Task<ObjectModelResponse> ReOpenRequest(Guid id);
         Task<ObjectModelResponse> CancelRequest(Guid id, RejectRequest model);
         Task<ObjectModelResponse> AutoFillRequestAdmin(Guid id);
         Task<ObjectModelResponse> GetTicketDetails(Guid id);
@@ -1313,33 +1312,7 @@ namespace UPOD.SERVICES.Services
                 Type = "Request"
             };
         }
-        public async Task<ObjectModelResponse> ReOpenRequest(Guid id)
-        {
-            var request = await _context.Requests.Where(a => a.Id.Equals(id) && a.IsDelete == false && a.RequestStatus!.Equals("RESOLVED")).FirstOrDefaultAsync();
-            request!.RequestStatus = ProcessStatus.EDITING.ToString();
-            request!.UpdateDate = DateTime.UtcNow.AddHours(7);
-            _context.Requests.Update(request);
-            var data = new ResolvingRequestResponse();
-            var rs = await _context.SaveChangesAsync();
-            if (rs > 0)
-            {
-                data = new ResolvingRequestResponse
-                {
-                    id = request.Id,
-                    code = request.Code,
-                    name = request.RequestName,
-                    status = request.RequestStatus,
-                    technician = request.CurrentTechnician!.TechnicianName,
-                };
-            }
-
-            return new ObjectModelResponse(data)
-            {
-                Status = 201,
-                Type = "Request"
-            };
-        }
-
+      
         public async Task<ObjectModelResponse> CancelRequest(Guid id, RejectRequest model)
         {
             var request = await _context.Requests.Where(a => a.Id.Equals(id) && a.IsDelete == false).FirstOrDefaultAsync();

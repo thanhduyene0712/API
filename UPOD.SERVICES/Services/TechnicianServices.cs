@@ -1662,6 +1662,11 @@ namespace UPOD.SERVICES.Services
                 status = 400;
                 message = "Phone is already exists!";
             }
+            else if (model.breach < 0)
+            {
+                status = 400;
+                message = "Breach must be greater than zero!";
+            }
             else
             {
                 message = "Successfully";
