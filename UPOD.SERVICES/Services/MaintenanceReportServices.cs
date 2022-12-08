@@ -238,6 +238,7 @@ namespace UPOD.SERVICES.Services
                     create_date = a.CreateDate,
                     is_delete = a.IsDelete,
                     status = a.Status,
+                    is_processed = a.IsProcessed,
                     agency = new AgencyViewResponse
                     {
                         id = a.AgencyId,
