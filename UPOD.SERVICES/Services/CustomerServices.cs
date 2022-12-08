@@ -29,7 +29,9 @@ namespace UPOD.SERVICES.Services
         Task<ObjectModelResponse> ApproveContract(Guid cus_id, Guid con_id);
         Task<ObjectModelResponse> RejectContract(Guid cus_id, Guid con_id, ContractRejectRequest model);
         Task<ObjectModelResponse> ApproveRequestResolved(Guid id);
- 
+        Task<ObjectModelResponse> ApproveMaintenanceReport(Guid id);
+
+
     }
 
     public class CustomerServices : ICustomerService
@@ -38,6 +40,26 @@ namespace UPOD.SERVICES.Services
         public CustomerServices(Database_UPODContext context)
         {
             _context = context;
+        }
+        public async Task<ObjectModelResponse> ApproveMaintenanceReport(Guid id)
+        {
+            var report = await _context.MaintenanceReports.Where(a => a.IsDelete == false && a.IsProcessed == true && a.Id.Equals(id)).FirstOrDefaultAsync();
+            var reportServices = await _context.MaintenanceReportServices.Where(a => a.IsResolved == false && a.Created == true).ToListAsync();
+            if (reportServices != null)
+            {
+                foreach (var item in reportServices)
+                {
+                    var request = await _context.Requests.Where(a => a.IsDelete == false && a.Id.Equals(item.RequestId)).FirstOrDefaultAsync();
+                    request!.RequestStatus = ProcessStatus.COMPLETED.ToString();
+                }
+            }
+            report!.Status = ReportStatus.COMPLETED.ToString();
+            report.UpdateDate = DateTime.UtcNow.AddHours(7);
+            await _context.SaveChangesAsync();
+            return new ObjectModelResponse(report)
+            {
+                Type = "Maintenance Report"
+            };
         }
         public async Task<ObjectModelResponse> ApproveRequestResolved(Guid id)
         {
@@ -51,7 +73,7 @@ namespace UPOD.SERVICES.Services
             };
         }
 
-        
+
         public async Task<ObjectModelResponse> RejectContract(Guid cus_id, Guid con_id, ContractRejectRequest model)
         {
             var contract = await _context.Contracts.Where(a => a.IsDelete == false

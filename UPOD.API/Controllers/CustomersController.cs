@@ -192,6 +192,19 @@ namespace UPOD.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpPut]
+        [Route("approve_maintenance_report_by_id")]
+        public async Task<ActionResult<ObjectModelResponse>> ApproveMaintenanceReport(Guid id)
+        {
+            try
+            {
+                return await _customer_sv.ApproveMaintenanceReport(id);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
 
     }
