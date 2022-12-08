@@ -30,6 +30,19 @@ namespace UPOD.API.Controllers
             }
         }
         [HttpGet]
+        [Route("get_list_maintenance_reports_by_customer_id")]
+        public async Task<ActionResult<ResponseModel<MaintenanceReportResponse>>> GetListMaintenanceReportsByCustomer(Guid id, [FromQuery] PaginationRequest model, [FromQuery] FilterStatusRequest value)
+        {
+            try
+            {
+                return await _maintenance_report_sv.GetListMaintenanceReportsByCustomer(id, model, value);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet]
         [Route("get_details_maintenance_report")]
         public async Task<ActionResult<ObjectModelResponse>> GetDetailsMaintenanceReport(Guid id)
         {
@@ -74,14 +87,14 @@ namespace UPOD.API.Controllers
         {
             try
             {
-                return await _maintenance_report_sv.UpdateMaintenanceReport(id,model);
+                return await _maintenance_report_sv.UpdateMaintenanceReport(id, model);
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
         }
-        
+
 
     }
 

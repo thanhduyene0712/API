@@ -13,6 +13,7 @@ namespace UPOD.SERVICES.Services
     public interface IMaintenanceScheduleService
     {
         Task<ResponseModel<MaintenanceScheduleResponse>> GetListMaintenanceSchedules(PaginationRequest model, FilterStatusRequest value);
+        Task<ResponseModel<MaintenanceScheduleResponse>> GetListMaintenanceSchedulesByCustomer(Guid id, PaginationRequest model, FilterStatusRequest value);
         Task<ResponseModel<MaintenanceScheduleResponse>> GetListMaintenanceSchedulesTechnician(PaginationRequest model, Guid id, FilterStatusRequest value);
         Task<ResponseModel<MaintenanceScheduleResponse>> GetListMaintenanceSchedulesAgency(PaginationRequest model, Guid id, FilterStatusRequest value);
         Task<ObjectModelResponse> UpdateMaintenanceSchedule(Guid id, MaintenanceScheduleRequest model);
@@ -495,6 +496,132 @@ namespace UPOD.SERVICES.Services
             };
 
         }
+        public async Task<ResponseModel<MaintenanceScheduleResponse>> GetListMaintenanceSchedulesByCustomer(Guid id, PaginationRequest model, FilterStatusRequest value)
+        {
+            var total = await _context.MaintenanceSchedules.Where(a => a.IsDelete == false && a.Agency!.CustomerId.Equals(id)).ToListAsync();
+            var maintenanceSchedules = new List<MaintenanceScheduleResponse>();
+            if (value.search == null && value.status == null)
+            {
+                total = await _context.MaintenanceSchedules.Where(a => a.IsDelete == false && a.Agency!.CustomerId.Equals(id)).ToListAsync();
+                maintenanceSchedules = await _context.MaintenanceSchedules.Where(a => a.IsDelete == false && a.Agency!.CustomerId.Equals(id)).Select(a => new MaintenanceScheduleResponse
+                {
+                    id = a.Id,
+                    code = a.Code,
+                    name = a.Name,
+                    description = a.Description,
+                    is_delete = a.IsDelete,
+                    create_date = a.CreateDate,
+                    update_date = a.UpdateDate,
+                    maintain_time = a.MaintainTime,
+                    status = a.Status,
+                    start_time = a.StartDate,
+                    end_time = a.EndDate,
+                    technician = new TechnicianViewResponse
+                    {
+                        id = _context.Technicians.Where(x => x.Id.Equals(a.TechnicianId)).Select(a => a.Id).FirstOrDefault(),
+                        phone = _context.Technicians.Where(x => x.Id.Equals(a.TechnicianId)).Select(a => a.Telephone).FirstOrDefault(),
+                        email = _context.Technicians.Where(x => x.Id.Equals(a.TechnicianId)).Select(a => a.Email).FirstOrDefault(),
+                        code = _context.Technicians.Where(x => x.Id.Equals(a.TechnicianId)).Select(a => a.Code).FirstOrDefault(),
+                        tech_name = _context.Technicians.Where(x => x.Id.Equals(a.TechnicianId)).Select(a => a.TechnicianName).FirstOrDefault(),
+                    },
+                    agency = new AgencyViewResponse
+                    {
+                        id = a.AgencyId,
+                        code = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Code).FirstOrDefault(),
+                        agency_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.AgencyName).FirstOrDefault(),
+                        address = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Address).FirstOrDefault(),
+                        phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Telephone).FirstOrDefault(),
+                        manager_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.ManagerName).FirstOrDefault(),
+                    },
+                    customer = new CustomerViewResponse
+                    {
+                        id = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.CustomerId).FirstOrDefault(),
+                        code = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Code).FirstOrDefault(),
+                        cus_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Name).FirstOrDefault(),
+                        address = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Address).FirstOrDefault(),
+                        phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Phone).FirstOrDefault(),
+                    }
+                }).OrderByDescending(a => a.update_date).Skip((model.PageNumber - 1) * model.PageSize).Take(model.PageSize).ToListAsync();
+            }
+            else
+            {
+
+                if (value.search == null)
+                {
+                    value.search = "";
+                }
+                if (value.status == null)
+                {
+                    value.status = "";
+                }
+                var agency_name = await _context.Agencies.Where(a => a.AgencyName!.Contains(value.search)).Select(a => a.Id).FirstOrDefaultAsync();
+                var customer_name = await _context.Customers.Where(a => a.Name!.Contains(value.search)).Select(a => a.Id).FirstOrDefaultAsync();
+                var contract_name = await _context.Contracts.Where(a => a.ContractName!.Contains(value.search)).Select(a => a.Id).FirstOrDefaultAsync();
+                var service_name = await _context.Services.Where(a => a.ServiceName!.Contains(value.search)).Select(a => a.Id).FirstOrDefaultAsync();
+                var technician_name = await _context.Technicians.Where(a => a.TechnicianName!.Contains(value.search)).Select(a => a.Id).FirstOrDefaultAsync();
+                total = await _context.MaintenanceSchedules.Where(a => a.IsDelete == false
+                && a.Agency!.CustomerId.Equals(id)
+                && (a.Status!.Contains(value.status)
+                && (a.Name!.Contains(value.search)
+                || a.Code!.Contains(value.search)
+                || a.AgencyId!.Equals(agency_name)
+                || a.TechnicianId!.Equals(technician_name)
+                || a.ContractId!.Equals(contract_name)))).ToListAsync();
+                maintenanceSchedules = await _context.MaintenanceSchedules.Where(a => a.IsDelete == false
+                && a.Agency!.CustomerId.Equals(id)
+                && (a.Status!.Contains(value.status)
+                && (a.Name!.Contains(value.search)
+                || a.Code!.Contains(value.search)
+                || a.AgencyId!.Equals(agency_name)
+                || a.TechnicianId!.Equals(technician_name)
+                || a.ContractId!.Equals(contract_name)))).Select(a => new MaintenanceScheduleResponse
+                {
+                    id = a.Id,
+                    code = a.Code,
+                    name = a.Name,
+                    description = a.Description,
+                    is_delete = a.IsDelete,
+                    create_date = a.CreateDate,
+                    update_date = a.UpdateDate,
+                    maintain_time = a.MaintainTime,
+                    status = a.Status,
+                    start_time = a.StartDate,
+                    end_time = a.EndDate,
+                    technician = new TechnicianViewResponse
+                    {
+                        id = _context.Technicians.Where(x => x.Id.Equals(a.TechnicianId)).Select(a => a.Id).FirstOrDefault(),
+                        phone = _context.Technicians.Where(x => x.Id.Equals(a.TechnicianId)).Select(a => a.Telephone).FirstOrDefault(),
+                        email = _context.Technicians.Where(x => x.Id.Equals(a.TechnicianId)).Select(a => a.Email).FirstOrDefault(),
+                        code = _context.Technicians.Where(x => x.Id.Equals(a.TechnicianId)).Select(a => a.Code).FirstOrDefault(),
+                        tech_name = _context.Technicians.Where(x => x.Id.Equals(a.TechnicianId)).Select(a => a.TechnicianName).FirstOrDefault(),
+                    },
+                    agency = new AgencyViewResponse
+                    {
+                        id = a.AgencyId,
+                        code = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Code).FirstOrDefault(),
+                        agency_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.AgencyName).FirstOrDefault(),
+                        address = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Address).FirstOrDefault(),
+                        phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Telephone).FirstOrDefault(),
+                        manager_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.ManagerName).FirstOrDefault(),
+                    },
+                    customer = new CustomerViewResponse
+                    {
+                        id = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.CustomerId).FirstOrDefault(),
+                        code = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Code).FirstOrDefault(),
+                        cus_name = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Name).FirstOrDefault(),
+                        address = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Address).FirstOrDefault(),
+                        phone = _context.Agencies.Where(x => x.Id.Equals(a.AgencyId)).Select(a => a.Customer!.Phone).FirstOrDefault(),
+                    }
+                }).OrderByDescending(a => a.update_date).Skip((model.PageNumber - 1) * model.PageSize).Take(model.PageSize).ToListAsync();
+            }
+
+            return new ResponseModel<MaintenanceScheduleResponse>(maintenanceSchedules)
+            {
+                Total = total.Count,
+                Type = "MaintenanceSchedules"
+            };
+
+        }
         public async Task<ResponseModel<MaintenanceScheduleResponse>> GetListMaintenanceSchedulesTechnician(PaginationRequest model, Guid id, FilterStatusRequest value)
         {
             var total = await _context.MaintenanceSchedules.Where(a => a.IsDelete == false && a.TechnicianId.Equals(id)).ToListAsync();
@@ -761,7 +888,7 @@ namespace UPOD.SERVICES.Services
                 maintenanceSchedule!.Description = model.description;
                 maintenanceSchedule!.MaintainTime = model.maintain_time;
                 maintenanceSchedule!.TechnicianId = model.technician_id;
-                if(model.maintain_time.Value.Date > maintenanceSchedule!.MaintainTime.Value.AddDays(2).Date)
+                if (model.maintain_time.Value.Date > maintenanceSchedule!.MaintainTime.Value.AddDays(2).Date)
                 {
                     maintenanceSchedule!.Status = ScheduleStatus.SCHEDULED.ToString();
                 }
