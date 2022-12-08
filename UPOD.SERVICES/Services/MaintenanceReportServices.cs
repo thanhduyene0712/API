@@ -70,10 +70,12 @@ namespace UPOD.SERVICES.Services
             var reportSchedule = await _context.MaintenanceReports.Where(a => a.IsDelete == false && a.Id.Equals(report_id)).FirstOrDefaultAsync();
             var reportServices = await _context.MaintenanceReportServices.Where(a => a.MaintenanceReportId.Equals(report_id) && a.IsResolved == false).ToListAsync();
             reportSchedule!.Status = ReportStatus.PROCESSING.ToString();
+            reportSchedule!.IsProcessed = true;
             reportSchedule.UpdateDate = DateTime.UtcNow.AddHours(7);
             var requests = new List<RequestCreateResponse>();
             if (reportServices.Count > 0)
             {
+                reportSchedule!.IsProcessed = false;
                 var num = await GetLastCode2();
                 foreach (var item in reportServices)
                 {
