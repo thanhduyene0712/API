@@ -44,7 +44,10 @@ namespace UPOD.SERVICES.Services
                             if (item1.RequestId != null)
                             {
                                 var request = await _context.Requests.Where(a => a.IsDelete == false && a.Id.Equals(item1.RequestId)).FirstOrDefaultAsync();
-                                if (request!.RequestStatus!.Equals("RESOLVED") || request!.RequestStatus!.Equals("COMPLETED"))
+                                if (request!.RequestStatus!.Equals("RESOLVED") 
+                                    || request!.RequestStatus!.Equals("COMPLETED") 
+                                    || request!.RequestStatus!.Equals("CANCELED") 
+                                    || request!.RequestStatus!.Equals("REJECTED"))
                                 {
                                     count = count + 1;
                                 }
