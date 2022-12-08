@@ -446,35 +446,31 @@ namespace UPOD.SERVICES.Services
         public async Task<ObjectModelResponse> UpdateMaintenanceReport(Guid id, MaintenanceReportRequest model)
         {
             var maintenanceReport = await _context.MaintenanceReports.Where(a => a.Id.Equals(id) && a.IsDelete == false).FirstOrDefaultAsync();
-            maintenanceReport!.Name = model.name;
-            maintenanceReport!.MaintenanceScheduleId = model.maintenance_schedule_id;
-            maintenanceReport!.UpdateDate = DateTime.UtcNow.AddHours(7);
-            maintenanceReport!.Status = ReportStatus.PENDING.ToString();
             var maintainSchedule = await _context.MaintenanceSchedules.Where(a => a.IsDelete == false && a.Id.Equals(model.maintenance_schedule_id)).FirstOrDefaultAsync();
-            var customer = await _context.Agencies.Where(a => a.IsDelete == false && a.Id.Equals(maintainSchedule!.AgencyId)).Select(a => a.CustomerId).FirstOrDefaultAsync();
-            var contracts = await _context.Contracts.Where(a => a.IsDelete == false && a.IsAccepted == true && a.IsExpire == false && a.CustomerId.Equals(customer)).ToListAsync();
+            var contract = await _context.Contracts.Where(a => a.IsDelete == false && a.IsAccepted == true && a.IsExpire == false && a.Id.Equals(maintainSchedule!.ContractId)).FirstOrDefaultAsync();
             var count = new List<ContractService>();
             var message = "blank";
             var status = 500;
-            foreach (var item in contracts)
+            var services = await _context.ContractServices.Where(x => x.ContractId.Equals(contract!.Id)
+            && x.Contract.IsDelete == false && x.Contract.IsExpire == false && x.Contract.IsAccepted == true && x.IsDelete == false
+            && (x.Contract.StartDate!.Value.Date <= DateTime.UtcNow.AddHours(7).Date
+            && x.Contract.EndDate!.Value.Date >= DateTime.UtcNow.AddHours(7).Date)).ToListAsync();
+            foreach (var item1 in services)
             {
-                var services = await _context.ContractServices.Where(x => x.Contract!.CustomerId.Equals(customer)
-                && x.Contract.IsDelete == false && x.Contract.IsExpire == false && x.Contract.IsAccepted == true && x.IsDelete == false
-                && (x.Contract.StartDate!.Value.Date <= DateTime.UtcNow.AddHours(7).Date
-                && x.Contract.EndDate!.Value.Date >= DateTime.UtcNow.AddHours(7).Date)).ToListAsync();
-                foreach (var item1 in services)
-                {
-                    count.Add(item1);
-                }
+                count.Add(item1);
             }
-
             if (model.service.Count != count.Count)
             {
-                message = "You need to add all service of this agency";
+                message = "You need to add all services of this contract";
                 status = 400;
             }
             else
             {
+                message = "Successfully";
+                status = 200;
+                maintenanceReport!.Name = model.name;
+                maintenanceReport!.MaintenanceScheduleId = model.maintenance_schedule_id;
+                maintenanceReport!.UpdateDate = DateTime.UtcNow.AddHours(7);
                 maintenanceReport!.Status = ReportStatus.PENDING.ToString();
                 var report_service_removes = await _context.MaintenanceReportServices.Where(a => a.MaintenanceReportId.Equals(maintenanceReport.Id)).ToListAsync();
                 foreach (var item in report_service_removes)
@@ -550,7 +546,7 @@ namespace UPOD.SERVICES.Services
                 data = new MaintenanceReportResponse
 
                 {
-                    id = maintenanceReport.Id,
+                    id = maintenanceReport!.Id,
                     name = maintenanceReport.Name,
                     code = maintenanceReport.Code,
                     update_date = maintenanceReport.UpdateDate,
@@ -659,26 +655,22 @@ namespace UPOD.SERVICES.Services
                 IsProcessed = false,
                 Status = ReportStatus.PENDING.ToString(),
             };
-            var customer = await _context.Agencies.Where(a => a.IsDelete == false && a.Id.Equals(agencyId)).Select(a => a.CustomerId).FirstOrDefaultAsync();
-            var contracts = await _context.Contracts.Where(a => a.IsDelete == false && a.IsAccepted == true && a.IsExpire == false && a.CustomerId.Equals(customer)).ToListAsync();
+            var maintenanceSchedule = await _context.MaintenanceSchedules.Where(a => a.IsDelete == false && a.Id.Equals(model.maintenance_schedule_id)).FirstOrDefaultAsync();
+            var contract = await _context.Contracts.Where(a => a.IsDelete == false && a.IsAccepted == true && a.IsExpire == false && a.Id.Equals(maintenanceSchedule!.ContractId)).FirstOrDefaultAsync();
             var count = new List<ContractService>();
             var message = "blank";
             var status = 500;
-            foreach (var item in contracts)
+            var services = await _context.ContractServices.Where(x => x.ContractId.Equals(contract!.Id)
+            && x.Contract.IsDelete == false && x.Contract.IsExpire == false && x.Contract.IsAccepted == true && x.IsDelete == false
+            && (x.Contract.StartDate!.Value.Date <= DateTime.UtcNow.AddHours(7).Date
+            && x.Contract.EndDate!.Value.Date >= DateTime.UtcNow.AddHours(7).Date)).ToListAsync();
+            foreach (var item1 in services)
             {
-                var services = await _context.ContractServices.Where(x => x.Contract!.CustomerId.Equals(customer)
-                && x.Contract.IsDelete == false && x.Contract.IsExpire == false && x.Contract.IsAccepted == true && x.IsDelete == false
-                && (x.Contract.StartDate!.Value.Date <= DateTime.UtcNow.AddHours(7).Date
-                && x.Contract.EndDate!.Value.Date >= DateTime.UtcNow.AddHours(7).Date)).ToListAsync();
-                foreach (var item1 in services)
-                {
-                    count.Add(item1);
-                }
+                count.Add(item1);
             }
-
             if (model.service.Count != count.Count)
             {
-                message = "You need to add all services of this agency";
+                message = "You need to add all services of this contract";
                 status = 400;
             }
             else
