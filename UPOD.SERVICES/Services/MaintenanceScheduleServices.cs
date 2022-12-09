@@ -324,7 +324,7 @@ namespace UPOD.SERVICES.Services
         }
         public async Task<List<MaintenanceSchedule>> SetMaintenanceSchedulesNotify()
         {
-            var todaySchedules = await _context.MaintenanceSchedules.Where(a => a.MaintainTime!.Value.Date == DateTime.UtcNow.AddHours(7).AddDays(2).Date && a.IsDelete == false && a.Status.Equals("SCHEDULED")).ToListAsync();
+            var todaySchedules = await _context.MaintenanceSchedules.Where(a => a.MaintainTime!.Value.Date <= DateTime.UtcNow.AddHours(7).AddDays(2).Date && a.IsDelete == false && a.Status.Equals("SCHEDULED")).ToListAsync();
             foreach (var item in todaySchedules)
             {
                 item.UpdateDate = DateTime.UtcNow.AddHours(7);
@@ -873,6 +873,7 @@ namespace UPOD.SERVICES.Services
         public async Task<ObjectModelResponse> UpdateMaintenanceSchedule(Guid id, MaintenanceScheduleRequest model)
         {
             var maintenanceSchedule = await _context.MaintenanceSchedules.Where(a => a.Id.Equals(id)).FirstOrDefaultAsync();
+            var date = maintenanceSchedule!.MaintainTime!.Value;
             var message = "blank";
             var status = 500;
             var data = new MaintenanceScheduleResponse();
@@ -888,7 +889,7 @@ namespace UPOD.SERVICES.Services
                 maintenanceSchedule!.Description = model.description;
                 maintenanceSchedule!.MaintainTime = model.maintain_time;
                 maintenanceSchedule!.TechnicianId = model.technician_id;
-                if (model.maintain_time.Value.Date > maintenanceSchedule!.MaintainTime.Value.AddDays(2).Date)
+                if (model.maintain_time.Value.Date >= date.AddDays(2).Date)
                 {
                     maintenanceSchedule!.Status = ScheduleStatus.SCHEDULED.ToString();
                 }
