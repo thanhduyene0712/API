@@ -666,6 +666,7 @@ namespace UPOD.SERVICES.Services
                         MaintenanceReportId = maintenanceReport.Id,
                         ServiceId = item1.service_id,
                         Created = false,
+                        IsResolved = item1.is_resolved,
                         RequestId = null,
                     };
                     if (item1.img!.Count > 0)
