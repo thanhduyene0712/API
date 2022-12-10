@@ -49,8 +49,11 @@ namespace UPOD.SERVICES.Services
             {
                 foreach (var item in reportServices)
                 {
-                    var request = await _context.Requests.Where(a => a.IsDelete == false && a.Id.Equals(item.RequestId) && a.RequestStatus.Equals("RESOLVED")).FirstOrDefaultAsync();
-                    request!.RequestStatus = ProcessStatus.COMPLETED.ToString();
+                    var request = await _context.Requests.Where(a => a.IsDelete == false && a.Id.Equals(item.RequestId)).FirstOrDefaultAsync();
+                    if (request!.RequestStatus!.Equals("RESOLVED"))
+                    {
+                        request!.RequestStatus = ProcessStatus.COMPLETED.ToString();
+                    }
                 }
             }
             report!.Status = ReportStatus.COMPLETED.ToString();
