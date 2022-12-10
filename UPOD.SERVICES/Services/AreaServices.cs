@@ -211,8 +211,8 @@ namespace UPOD.SERVICES.Services
             }
             else
             {
-                technicians = area_technicians;
-                total = area_technicians;
+                technicians = areaOfTech;
+                total = areaOfTech;
             }
             return new ResponseModel<TechnicianViewResponse>(technicians)
             {
