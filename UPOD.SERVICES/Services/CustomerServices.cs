@@ -49,7 +49,7 @@ namespace UPOD.SERVICES.Services
             {
                 foreach (var item in reportServices)
                 {
-                    var request = await _context.Requests.Where(a => a.IsDelete == false && a.Id.Equals(item.RequestId)).FirstOrDefaultAsync();
+                    var request = await _context.Requests.Where(a => a.IsDelete == false && a.Id.Equals(item.RequestId) && a.RequestStatus.Equals("RESOLVED")).FirstOrDefaultAsync();
                     request!.RequestStatus = ProcessStatus.COMPLETED.ToString();
                 }
             }
