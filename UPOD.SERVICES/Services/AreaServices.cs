@@ -103,12 +103,14 @@ namespace UPOD.SERVICES.Services
             {
                 var skill_techs = await _context.Skills.Where(a => a.IsDelete == false && a.ServiceId.Equals(item.ServiceId)).Select(a => new TechnicianViewResponse
                 {
-                    id = a.Technician.Id,
-                    code = a.Technician.Code,
+                    id = a.TechnicianId,
+                    code = a.Technician!.Code,
                     email = a.Technician.Email,
                     tech_name = a.Technician.TechnicianName,
                     phone = a.Technician.Telephone,
-                }).Distinct().ToListAsync();
+                    area_name = _context.Areas.Where(x => x.Id.Equals(a.Technician.AreaId)).Select(a => a.AreaName).FirstOrDefault(),
+                    skills = _context.Skills.Where(x => x.TechnicianId.Equals(a.TechnicianId)).Select(a => a.Service.ServiceName).ToList()!,
+                })/*.Distinct()*/.ToListAsync();
                 foreach (var item1 in skill_techs)
                 {
                     customer_technicians.Add(new TechnicianViewResponse
@@ -118,18 +120,22 @@ namespace UPOD.SERVICES.Services
                         email = item1.email,
                         tech_name = item1.tech_name,
                         phone = item1.phone,
+                        area_name = item1.area_name,
+                        skills = item1.skills,
                     });
                 }
 
             }
             var skill_technicians = await _context.Skills.Where(a => a.IsDelete == false).Select(a => new TechnicianViewResponse
             {
-                id = a.Technician.Id,
-                code = a.Technician.Code,
+                id = a.TechnicianId,
+                code = a.Technician!.Code,
                 email = a.Technician.Email,
                 tech_name = a.Technician.TechnicianName,
                 phone = a.Technician.Telephone,
-            }).Distinct().ToListAsync();
+                area_name = _context.Areas.Where(x => x.Id.Equals(a.Technician.AreaId)).Select(a => a.AreaName).FirstOrDefault(),
+                skills = _context.Skills.Where(x => x.TechnicianId.Equals(a.TechnicianId)).Select(a => a.Service.ServiceName).ToList()!,
+            })/*.Distinct()*/.ToListAsync();
             var area_technicians = await _context.Technicians.Where(a => a.IsDelete == false && a.AreaId.Equals(id)).Select(a => new TechnicianViewResponse
             {
                 id = a.Id,
@@ -137,7 +143,9 @@ namespace UPOD.SERVICES.Services
                 email = a.Email,
                 tech_name = a.TechnicianName,
                 phone = a.Telephone,
-            }).Distinct().ToListAsync();
+                area_name = _context.Areas.Where(x => x.Id.Equals(a.AreaId)).Select(a => a.AreaName).FirstOrDefault(),
+                skills = _context.Skills.Where(x => x.TechnicianId.Equals(a.Id)).Select(a => a.Service.ServiceName).ToList()!,
+            })/*.Distinct()*/.ToListAsync();
             var technicians = new List<TechnicianViewResponse>();
             var technician_check = new List<TechnicianViewResponse>();
             var technician_compares = customer_technicians.Where(i => skill_technicians.Contains(i)).ToList();
