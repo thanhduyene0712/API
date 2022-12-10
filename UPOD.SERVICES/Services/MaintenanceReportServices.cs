@@ -186,7 +186,7 @@ namespace UPOD.SERVICES.Services
                     {
                         Id = request_id,
                         Code = code,
-                        RequestName = "Request auto: " + reportSchedule.Name,
+                        RequestName = "Request auto: " + reportSchedule.Code,
                         CustomerId = reportSchedule.CustomerId,
                         ServiceId = item.ServiceId,
                         AgencyId = reportSchedule.AgencyId,
