@@ -7,6 +7,7 @@
         public string? tech_name { get; set; }
         public string? email { get; set; }
         public string? phone { get; set; }
+        public int? number_of_requests { get; set; }
         public string? area_name { get; set; }
         public List<string>? skills { get; set; }
         public override bool Equals(object? obj)

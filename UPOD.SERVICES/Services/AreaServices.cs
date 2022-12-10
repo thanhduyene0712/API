@@ -99,8 +99,10 @@ namespace UPOD.SERVICES.Services
             && (x.Contract.StartDate!.Value.Date <= DateTime.UtcNow.AddHours(7).Date
             && x.Contract.EndDate!.Value.Date >= DateTime.UtcNow.AddHours(7).Date)).Distinct().ToListAsync();
             var customer_technicians = new List<TechnicianViewResponse>();
+            DateTime date = DateTime.UtcNow.AddHours(7);
             foreach (var item in customer_services)
             {
+
                 var skill_techs = await _context.Skills.Where(a => a.IsDelete == false && a.ServiceId.Equals(item.ServiceId)).Select(a => new TechnicianViewResponse
                 {
                     id = a.TechnicianId,
@@ -113,6 +115,13 @@ namespace UPOD.SERVICES.Services
                 })/*.Distinct()*/.ToListAsync();
                 foreach (var item1 in skill_techs)
                 {
+                    date = date.AddDays((-date.Day) + 1).Date;
+                    var requests = await _context.Requests.Where(a => a.IsDelete == false
+                    && a.CurrentTechnicianId.Equals(item1.id)
+                    && a.RequestStatus.Equals("COMPLETED")
+                    && a.CreateDate!.Value.Date >= date
+                    && a.CreateDate!.Value.Date <= DateTime.UtcNow.AddHours(7)).ToListAsync();
+                    var count = requests.Count;
                     customer_technicians.Add(new TechnicianViewResponse
                     {
                         id = item1.id,
@@ -120,6 +129,7 @@ namespace UPOD.SERVICES.Services
                         email = item1.email,
                         tech_name = item1.tech_name,
                         phone = item1.phone,
+                        number_of_requests = count,
                         area_name = item1.area_name,
                         skills = item1.skills,
                     });
@@ -136,6 +146,29 @@ namespace UPOD.SERVICES.Services
                 area_name = _context.Areas.Where(x => x.Id.Equals(a.Technician.AreaId)).Select(a => a.AreaName).FirstOrDefault(),
                 skills = _context.Skills.Where(x => x.TechnicianId.Equals(a.TechnicianId)).Select(a => a.Service.ServiceName).ToList()!,
             })/*.Distinct()*/.ToListAsync();
+            var skillOfTech = new List<TechnicianViewResponse>();
+            var areaOfTech = new List<TechnicianViewResponse>();
+            foreach (var item in skill_technicians)
+            {
+                date = date.AddDays((-date.Day) + 1).Date;
+                var requests = await _context.Requests.Where(a => a.IsDelete == false
+                && a.CurrentTechnicianId.Equals(item.id)
+                && a.RequestStatus.Equals("COMPLETED")
+                && a.CreateDate!.Value.Date >= date
+                && a.CreateDate!.Value.Date <= DateTime.UtcNow.AddHours(7)).ToListAsync();
+                var count = requests.Count;
+                skillOfTech.Add(new TechnicianViewResponse
+                {
+                    id = item.id,
+                    code = item.code,
+                    email = item.email,
+                    tech_name = item.tech_name,
+                    phone = item.phone,
+                    number_of_requests = count,
+                    area_name = item.area_name,
+                    skills = item.skills,
+                });
+            }
             var area_technicians = await _context.Technicians.Where(a => a.IsDelete == false && a.AreaId.Equals(id)).Select(a => new TechnicianViewResponse
             {
                 id = a.Id,
@@ -146,11 +179,32 @@ namespace UPOD.SERVICES.Services
                 area_name = _context.Areas.Where(x => x.Id.Equals(a.AreaId)).Select(a => a.AreaName).FirstOrDefault(),
                 skills = _context.Skills.Where(x => x.TechnicianId.Equals(a.Id)).Select(a => a.Service.ServiceName).ToList()!,
             })/*.Distinct()*/.ToListAsync();
+            foreach (var item in area_technicians)
+            {
+                date = date.AddDays((-date.Day) + 1).Date;
+                var requests = await _context.Requests.Where(a => a.IsDelete == false
+                && a.CurrentTechnicianId.Equals(item.id)
+                && a.RequestStatus.Equals("COMPLETED")
+                && a.CreateDate!.Value.Date >= date
+                && a.CreateDate!.Value.Date <= DateTime.UtcNow.AddHours(7)).ToListAsync();
+                var count = requests.Count;
+                areaOfTech.Add(new TechnicianViewResponse
+                {
+                    id = item.id,
+                    code = item.code,
+                    email = item.email,
+                    tech_name = item.tech_name,
+                    phone = item.phone,
+                    number_of_requests = count,
+                    area_name = item.area_name,
+                    skills = item.skills,
+                });
+            }
             var technicians = new List<TechnicianViewResponse>();
             var technician_check = new List<TechnicianViewResponse>();
-            var technician_compares = customer_technicians.Where(i => skill_technicians.Contains(i)).ToList();
-            technician_check = area_technicians.Where(i => technician_compares.Contains(i)).Skip((model.PageNumber - 1) * model.PageSize).Take(model.PageSize).ToList();
-            var total = area_technicians.Where(i => technician_compares.Contains(i)).ToList();
+            var technician_compares = customer_technicians.Where(i => skillOfTech.Contains(i)).ToList();
+            technician_check = areaOfTech.Where(i => technician_compares.Contains(i)).Skip((model.PageNumber - 1) * model.PageSize).Take(model.PageSize).ToList();
+            var total = areaOfTech.Where(i => technician_compares.Contains(i)).ToList();
             if (technician_check.Count > 0)
             {
                 technicians = technician_check;
