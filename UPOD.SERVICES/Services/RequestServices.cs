@@ -1324,12 +1324,6 @@ namespace UPOD.SERVICES.Services
             request!.CancelReason = model.reason;
             request!.RequestStatus = ProcessStatus.CANCELED.ToString();
             request!.UpdateDate = DateTime.UtcNow.AddHours(7);
-            var report_service = await _context.MaintenanceReportServices.Where(a => a.RequestId.Equals(request.Id)).FirstOrDefaultAsync();
-            if (report_service != null)
-            {
-                report_service!.Created = false;
-                report_service!.RequestId = null;
-            }
             var data = new ResolvingRequestResponse();
             var rs = await _context.SaveChangesAsync();
             if (rs > 0)
