@@ -63,31 +63,32 @@ namespace UPOD.SERVICES.Services
                                 {
                                     count = 0;
                                     item.IsProcessed = true;
+                                    await _notificationService.createNotification(new Notification
+                                    {
+                                        isRead = false,
+                                        ObjectName = ObjectName.MR.ToString(),
+                                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                                        NotificationContent = "You have a maintenance report need to approve!",
+                                        CurrentObject_Id = item.Id,
+                                        UserId = item.CustomerId,
+                                    });
+                                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.CustomerId);
+                                    var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
+                                    foreach (var item2 in admins)
+                                    {
+                                        await _notificationService.createNotification(new Notification
+                                        {
+                                            isRead = false,
+                                            CurrentObject_Id = item.Id,
+                                            NotificationContent = "You have a maintenance report need to approve!",
+                                            UserId = item.Id,
+                                            ObjectName = ObjectName.MR.ToString(),
+                                        });
+                                        await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item2.Id);
+                                    }
                                 }
                             }
-                            await _notificationService.createNotification(new Notification
-                            {
-                                isRead = false,
-                                ObjectName = ObjectName.MR.ToString(),
-                                CreatedTime = DateTime.UtcNow.AddHours(7),
-                                NotificationContent = "You have a maintenance report need to approve!",
-                                CurrentObject_Id = item.Id,
-                                UserId = item.CustomerId,
-                            });
-                            await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.CustomerId);
-                            var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
-                            foreach (var item2 in admins)
-                            {
-                                await _notificationService.createNotification(new Notification
-                                {
-                                    isRead = false,
-                                    CurrentObject_Id = item.Id,
-                                    NotificationContent = "You have a maintenance report need to approve!",
-                                    UserId = item.Id,
-                                    ObjectName = ObjectName.MR.ToString(),
-                                });
-                                await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item2.Id);
-                            }
+
                         }
                     }
                 }
