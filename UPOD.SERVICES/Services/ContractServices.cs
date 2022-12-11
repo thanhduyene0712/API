@@ -61,7 +61,7 @@ namespace UPOD.SERVICES.Services
         public async Task SetContractNotify()
         {
 
-            var todayContracts = await _context.Contracts.Where(a => (a.EndDate!.Value.Date <= DateTime.UtcNow.AddHours(7).Date && a.IsDelete == false)).ToListAsync();
+            var todayContracts = await _context.Contracts.Where(a => (a.EndDate!.Value.Date <= DateTime.UtcNow.AddHours(7).Date && a.IsDelete == false && a.IsExpire == false)).ToListAsync();
             foreach (var item in todayContracts)
             {
                 item!.IsExpire = true;
