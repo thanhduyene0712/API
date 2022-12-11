@@ -332,42 +332,46 @@ namespace UPOD.SERVICES.Services
         public async Task SetMaintenanceSchedulesNotify()
         {
             var todaySchedules = await _context.MaintenanceSchedules.Where(a => a.MaintainTime!.Value.Date <= DateTime.UtcNow.AddHours(7).AddDays(2).Date && a.IsDelete == false && a.Status.Equals("SCHEDULED")).ToListAsync();
-            foreach (var item in todaySchedules)
+            if(todaySchedules.Count > 0)
             {
-                item.UpdateDate = DateTime.UtcNow.AddHours(7);
-                item.Status = ScheduleStatus.NOTIFIED.ToString();
-                var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
-                await _notificationService.createNotification(new Notification
+                foreach (var item in todaySchedules)
                 {
-                    isRead = false,
-                    CurrentObject_Id = item.Id,
-                    NotificationContent = "You have a maintenance schedule for today!",
-                    UserId = item.TechnicianId,
-                    ObjectName = ObjectName.MS.ToString(),
-                });
-                await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.TechnicianId);
-                foreach (var item1 in admins)
-                {
+                    item.UpdateDate = DateTime.UtcNow.AddHours(7);
+                    item.Status = ScheduleStatus.NOTIFIED.ToString();
                     await _notificationService.createNotification(new Notification
                     {
                         isRead = false,
                         CurrentObject_Id = item.Id,
                         NotificationContent = "You have a maintenance schedule for today!",
-                        UserId = item1.Id,
+                        UserId = item.TechnicianId,
                         ObjectName = ObjectName.MS.ToString(),
                     });
-                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item1.Id);
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.TechnicianId);
+                    var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
+                    foreach (var item1 in admins)
+                    {
+                        await _notificationService.createNotification(new Notification
+                        {
+                            isRead = false,
+                            CurrentObject_Id = item.Id,
+                            NotificationContent = "You have a maintenance schedule for today!",
+                            UserId = item1.Id,
+                            ObjectName = ObjectName.MS.ToString(),
+                        });
+                        await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item1.Id);
+                    }
+                    var customerId = await _context.Agencies.Where(a => a.IsDelete == false && a.Id.Equals(item.AgencyId)).Select(a => a.CustomerId).FirstOrDefaultAsync();
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        CurrentObject_Id = item.Id,
+                        NotificationContent = "You have a maintenance schedule for today!",
+                        UserId = customerId,
+                        ObjectName = ObjectName.MS.ToString(),
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", customerId);
+                    await _context.SaveChangesAsync();
                 }
-                await _notificationService.createNotification(new Notification
-                {
-                    isRead = false,
-                    CurrentObject_Id = item.Id,
-                    NotificationContent = "You have a maintenance schedule for today!",
-                    UserId = item.Agency!.CustomerId,
-                    ObjectName = ObjectName.MS.ToString(),
-                });
-                await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.Agency.CustomerId);
-                await _context.SaveChangesAsync();
             }
         }
         public async Task SetMaintenanceSchedulesNotifyWarning()

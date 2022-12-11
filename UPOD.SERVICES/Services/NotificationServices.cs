@@ -50,8 +50,8 @@ namespace UPOD.SERVICES.Services
         }
         public async Task<ResponseModel<Notification>> GetAll(PaginationRequest model, Guid id)
         {
-            var noti = await _context.Notifications.Where(a => a.UserId.Equals(id) && (a.CreatedTime!.Value >= DateTime.UtcNow.AddHours(6) || a.isRead == false)).OrderByDescending(a => a.CreatedTime).Skip((model.PageNumber - 1) * model.PageSize).Take(model.PageSize).ToListAsync();
-            var total = await _context.Notifications.Where(a => a.UserId.Equals(id) && (a.CreatedTime!.Value >= DateTime.UtcNow.AddHours(6) || a.isRead == false)).CountAsync();
+            var noti = await _context.Notifications.Where(a => a.UserId.Equals(id)).OrderByDescending(a => a.CreatedTime).Skip((model.PageNumber - 1) * model.PageSize).Take(model.PageSize).ToListAsync();
+            var total = await _context.Notifications.Where(a => a.UserId.Equals(id)).CountAsync();
 
             return new ResponseModel<Notification>(noti)
             {
