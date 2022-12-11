@@ -40,11 +40,13 @@ namespace UPOD.SERVICES.Services
 
         private readonly Database_UPODContext _context;
         private readonly IHubContext<NotifyHub> _notifyHub;
+        private readonly INotificationService _notificationService;
 
-        public RequestServices(Database_UPODContext context, IHubContext<NotifyHub> notifyHub)
+        public RequestServices(Database_UPODContext context, IHubContext<NotifyHub> notifyHub, INotificationService notificationService)
         {
             _context = context;
             _notifyHub = notifyHub;
+            _notificationService = notificationService;
         }
         public async Task<ObjectModelResponse> GetTicketDetails(Guid id)
         {
@@ -1066,17 +1068,15 @@ namespace UPOD.SERVICES.Services
                     noti_id = Guid.NewGuid();
                 }
             }
-            var notification = new Notification
+            await _notificationService.createNotification(new Notification
             {
-                Id = noti_id,
                 isRead = false,
-                NotificationContent = "You have a new Request!",
-                CreatedTime = DateTime.UtcNow.AddHours(7),
-                ObjectName = "RE",
                 CurrentObject_Id = request.Id,
+                NotificationContent = "You have a new request!",
                 UserId = request.CustomerId,
-            };
-            await _notifyHub.Clients.All.SendAsync("ReceiveMessage", notification.CurrentObject_Id);
+                ObjectName = ObjectName.RE.ToString(),
+            });
+            await _notifyHub.Clients.All.SendAsync("ReceiveMessage", request.CustomerId);
             await _context.Requests.AddAsync(request);
             var rs = await _context.SaveChangesAsync();
             if (rs > 0)
