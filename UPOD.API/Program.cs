@@ -149,10 +149,10 @@ app.UseAuthentication(); //authenticate
 app.UseAuthorization();
 
 app.MapHub<NotifyHub>("/notifyHub");
-app.Map("/notifyHub", map =>
-{
-    map.UseCors(MyAllowSpecificOrigins);
-});
+//app.Map("/notifyHub", map =>
+//{
+//    map.UseCors(MyAllowSpecificOrigins);
+//});
 
 //app.UseEndpoints(endpoint =>
 //{

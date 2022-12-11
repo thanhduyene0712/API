@@ -45,5 +45,18 @@ namespace UPOD.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpPut]
+        [Route("read_all_notifications")]
+        public async Task<ActionResult<ResponseModel<Notification>>> UpdateAllNoti(Guid user_id)
+        {
+            try
+            {
+                return await _notificationSv.UpdateAllNoti(user_id);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

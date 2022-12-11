@@ -16,6 +16,7 @@ namespace UPOD.SERVICES.Services
         Task createNotification(Notification model);
         Task<ResponseModel<Notification>> GetAll(PaginationRequest model, Guid id);
         Task<ObjectModelResponse> UpdateNoti(Guid id);
+        Task<ResponseModel<Notification>> UpdateAllNoti(Guid user_id);
 
     }
 
@@ -64,6 +65,19 @@ namespace UPOD.SERVICES.Services
             noti!.isRead = true;
             await _context.SaveChangesAsync();
             return new ObjectModelResponse(noti)
+            {
+                Type = "Notification"
+            };
+        }
+        public async Task<ResponseModel<Notification>> UpdateAllNoti(Guid user_id)
+        {
+            var notis = await _context.Notifications.Where(a => a.UserId.Equals(user_id) && a.isRead == false).ToListAsync();
+            foreach (var item in notis)
+            {
+                item!.isRead = true;
+            }
+            await _context.SaveChangesAsync();
+            return new ResponseModel<Notification>(notis)
             {
                 Type = "Notifications"
             };

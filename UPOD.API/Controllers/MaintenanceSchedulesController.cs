@@ -19,22 +19,16 @@ namespace UPOD.API.Controllers
 
         private readonly IMaintenanceScheduleService _maintenanceSchedule_sv;
         private readonly IMaintenanceReportService _maintenanceReport_sv;
-        private readonly IHubContext<NotifyHub> _notifyHub;
-        private readonly INotificationService _notification_Sv;
         private readonly IRequestService _request_Sv;
         private readonly IContractServiceService _contract_sv;
         public MaintenanceSchedulesController(IMaintenanceScheduleService maintenanceSchedule_sv
             , IContractServiceService contract_sv
             , IMaintenanceReportService maintenanceReport_sv
-            , IHubContext<NotifyHub> notifyHub
-            , INotificationService notification_Sv
             , IRequestService request_Sv)
         {
             _maintenanceSchedule_sv = maintenanceSchedule_sv;
             _contract_sv = contract_sv;
             _maintenanceReport_sv = maintenanceReport_sv;
-            _notifyHub = notifyHub;
-            _notification_Sv = notification_Sv;
             _request_Sv = request_Sv;
         }
 
@@ -45,19 +39,7 @@ namespace UPOD.API.Controllers
             try
             {
 
-                var listMaintenanceSchedule = await _maintenanceSchedule_sv.SetMaintenanceSchedulesNotify();
-                foreach (var item in listMaintenanceSchedule)
-                {
-                    await _notification_Sv.createNotification(new Notification
-                    {
-                        isRead = false,
-                        CurrentObject_Id = item.Id,
-                        NotificationContent = "You have a maintenance schedule for today!",
-                        UserId = item.TechnicianId,
-                        ObjectName = ObjectName.MS.ToString(),
-                    });
-                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.TechnicianId);
-                }
+                await _maintenanceSchedule_sv.SetMaintenanceSchedulesNotify();
                 await _maintenanceSchedule_sv.SetMaintenanceSchedulesNotifyWarning();
                 await _maintenanceSchedule_sv.SetMaintenanceSchedulesNotifyMissing();
                 await _contract_sv.SetContractNotify();

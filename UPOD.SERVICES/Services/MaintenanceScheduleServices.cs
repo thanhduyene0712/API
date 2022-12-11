@@ -1,7 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Dynamic.Core;
+using UPOD.API.HubService;
 using UPOD.REPOSITORIES.Models;
 using UPOD.REPOSITORIES.RequestModels;
 using UPOD.REPOSITORIES.ResponseModels;
@@ -22,7 +24,7 @@ namespace UPOD.SERVICES.Services
         Task<ObjectModelResponse> DisableMaintenanceSchedule(Guid id);
         Task<ObjectModelResponse> MaintenanceScheduleDetails(Guid id);
         Task<ResponseModel<TechnicianOfRequestResponse>> GetTechnicianSchedule(Guid id);
-        Task<List<MaintenanceSchedule>> SetMaintenanceSchedulesNotify();
+        Task SetMaintenanceSchedulesNotify();
         Task SetMaintenanceSchedulesNotifyWarning();
         Task SetMaintenanceSchedulesNotifyMissing();
     }
@@ -30,9 +32,14 @@ namespace UPOD.SERVICES.Services
     public class MaintenanceScheduleServices : IMaintenanceScheduleService
     {
         private readonly Database_UPODContext _context;
-        public MaintenanceScheduleServices(Database_UPODContext context)
+        private readonly INotificationService _notificationService;
+        private readonly IHubContext<NotifyHub> _notifyHub;
+
+        public MaintenanceScheduleServices(Database_UPODContext context, INotificationService notificationService, IHubContext<NotifyHub> notifyHub)
         {
             _context = context;
+            _notificationService = notificationService;
+            _notifyHub = notifyHub;
         }
         public async Task<ResponseModel<TechnicianOfRequestResponse>> GetTechnicianSchedule(Guid id)
         {
@@ -322,17 +329,46 @@ namespace UPOD.SERVICES.Services
                 Type = "MaintenanceSchedule"
             };
         }
-        public async Task<List<MaintenanceSchedule>> SetMaintenanceSchedulesNotify()
+        public async Task SetMaintenanceSchedulesNotify()
         {
             var todaySchedules = await _context.MaintenanceSchedules.Where(a => a.MaintainTime!.Value.Date <= DateTime.UtcNow.AddHours(7).AddDays(2).Date && a.IsDelete == false && a.Status.Equals("SCHEDULED")).ToListAsync();
             foreach (var item in todaySchedules)
             {
                 item.UpdateDate = DateTime.UtcNow.AddHours(7);
                 item.Status = ScheduleStatus.NOTIFIED.ToString();
+                var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
+                await _notificationService.createNotification(new Notification
+                {
+                    isRead = false,
+                    CurrentObject_Id = item.Id,
+                    NotificationContent = "You have a maintenance schedule for today!",
+                    UserId = item.TechnicianId,
+                    ObjectName = ObjectName.MS.ToString(),
+                });
+                await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.TechnicianId);
+                foreach (var item1 in admins)
+                {
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        CurrentObject_Id = item.Id,
+                        NotificationContent = "You have a maintenance schedule for today!",
+                        UserId = item1.Id,
+                        ObjectName = ObjectName.MS.ToString(),
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item1.Id);
+                }
+                await _notificationService.createNotification(new Notification
+                {
+                    isRead = false,
+                    CurrentObject_Id = item.Id,
+                    NotificationContent = "You have a maintenance schedule for today!",
+                    UserId = item.Agency!.CustomerId,
+                    ObjectName = ObjectName.MS.ToString(),
+                });
+                await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.Agency.CustomerId);
                 await _context.SaveChangesAsync();
             }
-
-            return todaySchedules;
         }
         public async Task SetMaintenanceSchedulesNotifyWarning()
         {
