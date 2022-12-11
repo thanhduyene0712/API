@@ -38,7 +38,7 @@ namespace UPOD.SERVICES.Services
 
         public async Task CheckMaintenanceReport()
         {
-            var maintenanceReports = await _context.MaintenanceReports.Where(a => a.IsDelete == false && a.Status.Equals("PROCESSING")).ToListAsync();
+            var maintenanceReports = await _context.MaintenanceReports.Where(a => a.IsDelete == false && a.Status.Equals("PROCESSING") && a.IsProcessed == false).ToListAsync();
             var count = 0;
             if (maintenanceReports.Count > 0)
             {
