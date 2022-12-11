@@ -457,7 +457,7 @@ namespace UPOD.SERVICES.Services
                         },
                     }).OrderByDescending(x => x.update_date).Skip((model.PageNumber - 1) * model.PageSize).Take(model.PageSize).ToListAsync();
                 }
-                else if(value.search.ToLower().Contains("system"))
+                else if (value.search.ToLower().Contains("system"))
                 {
                     var agency_name = await _context.Agencies.Where(a => a.AgencyName!.Contains(value.search!)).Select(a => a.Id).FirstOrDefaultAsync();
                     var customer_name = await _context.Customers.Where(a => a.Name!.Contains(value.search!)).Select(a => a.Id).FirstOrDefaultAsync();
@@ -971,6 +971,16 @@ namespace UPOD.SERVICES.Services
             request!.UpdateDate = DateTime.UtcNow.AddHours(7);
             request.RequestStatus = ProcessStatus.PREPARING.ToString();
             var data = new MappingTechnicianResponse();
+            await _notificationService.createNotification(new Notification
+            {
+                isRead = false,
+                ObjectName = ObjectName.RE.ToString(),
+                CreatedTime = DateTime.UtcNow.AddHours(7),
+                NotificationContent = "You have a request need to resolve!",
+                CurrentObject_Id = request.Id,
+                UserId = technician_id,
+            });
+            await _notifyHub.Clients.All.SendAsync("ReceiveMessage", technician_id);
             var rs = await _context.SaveChangesAsync();
             if (rs > 0)
             {
@@ -1055,19 +1065,6 @@ namespace UPOD.SERVICES.Services
                 ContractId = contract_id
             };
             var data = new RequestCreateResponse();
-            var noti_id = Guid.NewGuid();
-            while (true)
-            {
-                var noti_dup = await _context.Notifications.Where(x => x.Id.Equals(noti_id)).FirstOrDefaultAsync();
-                if (noti_dup == null)
-                {
-                    break;
-                }
-                else
-                {
-                    noti_id = Guid.NewGuid();
-                }
-            }
             await _notificationService.createNotification(new Notification
             {
                 isRead = false,
@@ -1077,6 +1074,19 @@ namespace UPOD.SERVICES.Services
                 ObjectName = ObjectName.RE.ToString(),
             });
             await _notifyHub.Clients.All.SendAsync("ReceiveMessage", request.CustomerId);
+            var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
+            foreach (var item in admins)
+            {
+                await _notificationService.createNotification(new Notification
+                {
+                    isRead = false,
+                    CurrentObject_Id = request.Id,
+                    NotificationContent = "You have a new request!",
+                    UserId = item.Id,
+                    ObjectName = ObjectName.RE.ToString(),
+                });
+                await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.Id);
+            }
             await _context.Requests.AddAsync(request);
             var rs = await _context.SaveChangesAsync();
             if (rs > 0)
@@ -1162,7 +1172,7 @@ namespace UPOD.SERVICES.Services
                 AdminId = model.admin_id,
                 ContractId = contract_id,
                 IsSystem = false,
-                
+
             };
             var data = new RequestCreateResponse();
 
@@ -1340,7 +1350,7 @@ namespace UPOD.SERVICES.Services
                 Type = "Request"
             };
         }
-      
+
         public async Task<ObjectModelResponse> CancelRequest(Guid id, RejectRequest model)
         {
             var request = await _context.Requests.Where(a => a.Id.Equals(id) && a.IsDelete == false).FirstOrDefaultAsync();
@@ -1395,7 +1405,7 @@ namespace UPOD.SERVICES.Services
             && a.UpdateDate!.Value.AddMinutes(10) <= DateTime.UtcNow.AddHours(7)).ToListAsync();
             if (requests.Count > 0)
             {
-                
+
                 foreach (var item in requests)
                 {
                     item!.UpdateDate = DateTime.UtcNow.AddHours(7);
@@ -1405,11 +1415,46 @@ namespace UPOD.SERVICES.Services
                     {
                         technician!.Breach = 3;
                     }
-                    else 
+                    else
                     {
                         technician!.Breach = technician!.Breach + 1;
                     }
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.RE.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "Request warning because the technician have no action!",
+                        CurrentObject_Id = item.Id,
+                        UserId = item.CustomerId,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.CustomerId);
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.RE.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "Request warning because the technician have no action!",
+                        CurrentObject_Id = item.Id,
+                        UserId = item.CurrentTechnicianId,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.CurrentTechnicianId);
+                    var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
+                    foreach (var item1 in admins)
+                    {
+                        await _notificationService.createNotification(new Notification
+                        {
+                            isRead = false,
+                            ObjectName = ObjectName.RE.ToString(),
+                            CreatedTime = DateTime.UtcNow.AddHours(7),
+                            NotificationContent = "Request warning because the technician have no action!",
+                            CurrentObject_Id = item.Id,
+                            UserId = item1.Id,
+                        });
+                        await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item1.Id);
+                    }
                 }
+
                 await _context.SaveChangesAsync();
             }
             //send notify to admin
