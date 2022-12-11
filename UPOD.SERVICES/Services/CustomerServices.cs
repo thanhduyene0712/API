@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using System.Data;
 using System.Diagnostics.Contracts;
 using System.Linq.Dynamic.Core;
 using System.Numerics;
+using UPOD.API.HubService;
 using UPOD.REPOSITORIES.Models;
 using UPOD.REPOSITORIES.RequestModels;
 using UPOD.REPOSITORIES.ResponseModels;
@@ -37,9 +39,14 @@ namespace UPOD.SERVICES.Services
     public class CustomerServices : ICustomerService
     {
         private readonly Database_UPODContext _context;
-        public CustomerServices(Database_UPODContext context)
+        private readonly INotificationService _notificationService;
+        private readonly IHubContext<NotifyHub> _notifyHub;
+
+        public CustomerServices(Database_UPODContext context, INotificationService notificationService, IHubContext<NotifyHub> notifyHub)
         {
             _context = context;
+            _notificationService = notificationService;
+            _notifyHub = notifyHub;
         }
         public async Task<ObjectModelResponse> ApproveMaintenanceReport(Guid id)
         {
@@ -58,6 +65,30 @@ namespace UPOD.SERVICES.Services
             }
             report!.Status = ReportStatus.COMPLETED.ToString();
             report.UpdateDate = DateTime.UtcNow.AddHours(7);
+            var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
+            foreach (var item in admins)
+            {
+                await _notificationService.createNotification(new Notification
+                {
+                    isRead = false,
+                    ObjectName = ObjectName.MR.ToString(),
+                    CreatedTime = DateTime.UtcNow.AddHours(7),
+                    NotificationContent = "You have a maintenance report completed!",
+                    CurrentObject_Id = report.MaintenanceScheduleId,
+                    UserId = item.Id,
+                });
+                await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.Id);
+            }
+            await _notificationService.createNotification(new Notification
+            {
+                isRead = false,
+                ObjectName = ObjectName.MR.ToString(),
+                CreatedTime = DateTime.UtcNow.AddHours(7),
+                NotificationContent = "You have a maintenance report completed!",
+                CurrentObject_Id = report.MaintenanceScheduleId,
+                UserId = report.CreateBy,
+            });
+            await _notifyHub.Clients.All.SendAsync("ReceiveMessage", report.CreateBy);
             await _context.SaveChangesAsync();
             return new ObjectModelResponse(report)
             {
@@ -69,6 +100,30 @@ namespace UPOD.SERVICES.Services
             var request = await _context.Requests.Where(a => a.IsDelete == false && a.Id.Equals(id)).FirstOrDefaultAsync();
             request!.UpdateDate = DateTime.UtcNow.AddHours(7);
             request!.RequestStatus = ProcessStatus.COMPLETED.ToString();
+            var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
+            foreach (var item in admins)
+            {
+                await _notificationService.createNotification(new Notification
+                {
+                    isRead = false,
+                    ObjectName = ObjectName.RE.ToString(),
+                    CreatedTime = DateTime.UtcNow.AddHours(7),
+                    NotificationContent = "You have a request completed!",
+                    CurrentObject_Id = request.Id,
+                    UserId = item.Id,
+                });
+                await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.Id);
+            }
+            await _notificationService.createNotification(new Notification
+            {
+                isRead = false,
+                ObjectName = ObjectName.RE.ToString(),
+                CreatedTime = DateTime.UtcNow.AddHours(7),
+                NotificationContent = "You have a request completed!",
+                CurrentObject_Id = request.Id,
+                UserId = request.CurrentTechnicianId,
+            });
+            await _notifyHub.Clients.All.SendAsync("ReceiveMessage", request.CurrentTechnicianId);
             await _context.SaveChangesAsync();
             return new ObjectModelResponse(request!)
             {
@@ -97,6 +152,20 @@ namespace UPOD.SERVICES.Services
                 contract!.UpdateDate = DateTime.UtcNow.AddHours(7);
                 contract!.RejectReason = model.reject_reason;
                 contract!.IsExpire = true;
+                var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
+                foreach (var item in admins)
+                {
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.CON.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "The contract have been rejected by customer!",
+                        CurrentObject_Id = contract.Id,
+                        UserId = item.Id,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.Id);
+                }
                 var rs = await _context.SaveChangesAsync();
                 if (rs > 0)
                 {
@@ -233,6 +302,20 @@ namespace UPOD.SERVICES.Services
                 contract!.IsAccepted = true;
                 contract!.IsExpire = false;
                 contract!.UpdateDate = DateTime.UtcNow.AddHours(7);
+                var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
+                foreach (var item in admins)
+                {
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.CON.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "The contract have been approved by customer!",
+                        CurrentObject_Id = contract.Id,
+                        UserId = item.Id,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.Id);
+                }
                 var rs = await _context.SaveChangesAsync();
                 if (rs > 0)
                 {

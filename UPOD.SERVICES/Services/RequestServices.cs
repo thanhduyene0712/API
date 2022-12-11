@@ -1166,7 +1166,26 @@ namespace UPOD.SERVICES.Services
 
             };
             var data = new RequestCreateResponse();
-
+            await _notificationService.createNotification(new Notification
+            {
+                isRead = false,
+                ObjectName = ObjectName.RE.ToString(),
+                CreatedTime = DateTime.UtcNow.AddHours(7),
+                NotificationContent = "You have a request need to resolve!",
+                CurrentObject_Id = request.Id,
+                UserId = request.CurrentTechnicianId,
+            });
+            await _notifyHub.Clients.All.SendAsync("ReceiveMessage", request.CurrentTechnicianId);
+            await _notificationService.createNotification(new Notification
+            {
+                isRead = false,
+                ObjectName = ObjectName.RE.ToString(),
+                CreatedTime = DateTime.UtcNow.AddHours(7),
+                NotificationContent = "You have a new request created by Admin!",
+                CurrentObject_Id = request.Id,
+                UserId = request.CustomerId,
+            });
+            await _notifyHub.Clients.All.SendAsync("ReceiveMessage", request.CustomerId);
             await _context.Requests.AddAsync(request);
             var rs = await _context.SaveChangesAsync();
             if (rs > 0)
@@ -1308,6 +1327,23 @@ namespace UPOD.SERVICES.Services
                 }
             }
             var request = await _context.Requests.Where(a => a.Id.Equals(id)).FirstOrDefaultAsync();
+            if (request!.CurrentTechnicianId != model.technician_id)
+            {
+                var notify = await _context.Notifications.Where(a => a.CurrentObject_Id.Equals(request.Id)
+                && a.ObjectName.Equals(ObjectName.RE.ToString())
+                && a.UserId.Equals(request!.CurrentTechnicianId)).FirstOrDefaultAsync();
+                _context.Notifications.Remove(notify!);
+                await _notificationService.createNotification(new Notification
+                {
+                    isRead = false,
+                    ObjectName = ObjectName.RE.ToString(),
+                    CreatedTime = DateTime.UtcNow.AddHours(7),
+                    NotificationContent = "You have a request need to resolve!",
+                    CurrentObject_Id = request.Id,
+                    UserId = model.technician_id,
+                });
+                await _notifyHub.Clients.All.SendAsync("ReceiveMessage", model.technician_id);
+            }
             var data = new RequestCreateResponse();
             request!.UpdateDate = DateTime.UtcNow.AddHours(7);
             request!.CustomerId = model.customer_id;
@@ -1354,6 +1390,36 @@ namespace UPOD.SERVICES.Services
             request!.RequestStatus = ProcessStatus.CANCELED.ToString();
             request!.UpdateDate = DateTime.UtcNow.AddHours(7);
             var data = new ResolvingRequestResponse();
+            if (request.AdminId == null)
+            {
+                var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
+                foreach (var item in admins)
+                {
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.RE.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "You have a request canceled!",
+                        CurrentObject_Id = request.Id,
+                        UserId = item.Id,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.Id);
+                }
+            }
+            else
+            {
+                await _notificationService.createNotification(new Notification
+                {
+                    isRead = false,
+                    ObjectName = ObjectName.RE.ToString(),
+                    CreatedTime = DateTime.UtcNow.AddHours(7),
+                    NotificationContent = "You have a request canceled!",
+                    CurrentObject_Id = request.Id,
+                    UserId = request.CustomerId,
+                });
+                await _notifyHub.Clients.All.SendAsync("ReceiveMessage", request.CustomerId);
+            }
             var rs = await _context.SaveChangesAsync();
             if (rs > 0)
             {
@@ -1512,9 +1578,17 @@ namespace UPOD.SERVICES.Services
             request!.RequestStatus = ProcessStatus.REJECTED.ToString();
             request!.UpdateDate = DateTime.UtcNow.AddHours(7);
             request!.ReasonReject = value.reason;
-
-            _context.Requests.Update(request);
             var data = new RejectResponse();
+            await _notificationService.createNotification(new Notification
+            {
+                isRead = false,
+                ObjectName = ObjectName.RE.ToString(),
+                CreatedTime = DateTime.UtcNow.AddHours(7),
+                NotificationContent = "You have a request rejected by Admin!",
+                CurrentObject_Id = request.Id,
+                UserId = request.CustomerId,
+            });
+            await _notifyHub.Clients.All.SendAsync("ReceiveMessage", request.CustomerId);
             var rs = await _context.SaveChangesAsync();
             if (rs > 0)
             {

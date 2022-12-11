@@ -352,6 +352,16 @@ namespace UPOD.SERVICES.Services
                         item.IsDelete = true;
                     }
                 }
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.CON.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "The contract have been terminated",
+                        CurrentObject_Id = contract.Id,
+                        UserId = contract.CustomerId,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", contract.CustomerId);
                 var rs = await _context.SaveChangesAsync();
                 if (rs > 0)
                 {
@@ -712,6 +722,16 @@ namespace UPOD.SERVICES.Services
                     message = "Successfully";
                     status = 200;
                     await _context.Contracts.AddAsync(contract);
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.CON.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "You have a contract need to approve!",
+                        CurrentObject_Id = contract.Id,
+                        UserId = contract.CustomerId,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", contract.CustomerId);
                     var rs = await _context.SaveChangesAsync();
                     if (rs > 0)
                     {

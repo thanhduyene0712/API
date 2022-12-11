@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Net.Sockets;
+using UPOD.API.HubService;
 using UPOD.REPOSITORIES.Models;
 using UPOD.REPOSITORIES.RequestModels;
 using UPOD.REPOSITORIES.ResponseModels;
@@ -39,9 +41,14 @@ namespace UPOD.SERVICES.Services
     public class TechnicianServices : ITechnicianService
     {
         private readonly Database_UPODContext _context;
-        public TechnicianServices(Database_UPODContext context)
+        private readonly IHubContext<NotifyHub> _notifyHub;
+        private readonly INotificationService _notificationService;
+
+        public TechnicianServices(Database_UPODContext context, IHubContext<NotifyHub> notifyHub, INotificationService notificationService)
         {
             _context = context;
+            _notifyHub = notifyHub;
+            _notificationService = notificationService;
         }
         public async Task<ResponseModel<TaskResponse>> GetTask(PaginationRequest model, Guid id, int task, FilterStatusRequest value)
         {
@@ -981,6 +988,30 @@ namespace UPOD.SERVICES.Services
                     request.EndTime = DateTime.UtcNow.AddHours(7);
                     message = "Successfully";
                     status = 200;
+                    var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
+                    foreach (var item in admins)
+                    {
+                        await _notificationService.createNotification(new Notification
+                        {
+                            isRead = false,
+                            ObjectName = ObjectName.RE.ToString(),
+                            CreatedTime = DateTime.UtcNow.AddHours(7),
+                            NotificationContent = "You have a request resolved!",
+                            CurrentObject_Id = request.Id,
+                            UserId = item.Id,
+                        });
+                        await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.Id);
+                    }
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.RE.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "You have a request resolved!",
+                        CurrentObject_Id = request.Id,
+                        UserId = request.CustomerId,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", request.CustomerId);
                     foreach (var item in model.ticket)
                     {
                         var device_id = Guid.NewGuid();
@@ -1076,6 +1107,30 @@ namespace UPOD.SERVICES.Services
             technician!.IsBusy = false;
             request!.UpdateDate = DateTime.UtcNow.AddHours(7);
             request!.RequestStatus = ProcessStatus.RESOLVED.ToString();
+            var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
+            foreach (var item in admins)
+            {
+                await _notificationService.createNotification(new Notification
+                {
+                    isRead = false,
+                    ObjectName = ObjectName.RE.ToString(),
+                    CreatedTime = DateTime.UtcNow.AddHours(7),
+                    NotificationContent = "The technician have been update report of request!",
+                    CurrentObject_Id = request.Id,
+                    UserId = item.Id,
+                });
+                await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.Id);
+            }
+            await _notificationService.createNotification(new Notification
+            {
+                isRead = false,
+                ObjectName = ObjectName.RE.ToString(),
+                CreatedTime = DateTime.UtcNow.AddHours(7),
+                NotificationContent = "The technician have been update report of request!",
+                CurrentObject_Id = request.Id,
+                UserId = request.CustomerId,
+            });
+            await _notifyHub.Clients.All.SendAsync("ReceiveMessage", request.CustomerId);
             var list = new List<DevicesOfRequestResponse>();
             var message = "blank";
             var status = 500;
@@ -1539,6 +1594,23 @@ namespace UPOD.SERVICES.Services
                     request!.RequestStatus = ProcessStatus.PREPARING.ToString();
                     request!.CurrentTechnicianId = technicians.FirstOrDefault()!.id;
                 }
+                if (request!.CurrentTechnicianId != technicians.FirstOrDefault()!.id)
+                {
+                    var notify = await _context.Notifications.Where(a => a.CurrentObject_Id.Equals(request.Id)
+                    && a.ObjectName.Equals(ObjectName.RE.ToString())
+                    && a.UserId.Equals(request!.CurrentTechnicianId)).FirstOrDefaultAsync();
+                    _context.Notifications.Remove(notify!);
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.RE.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "You have a request need to resolve!",
+                        CurrentObject_Id = request.Id,
+                        UserId = technicians.FirstOrDefault()!.id,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", technicians.FirstOrDefault()!.id);
+                }
                 var rs = await _context.SaveChangesAsync();
                 if (rs > 0)
                 {
@@ -1587,6 +1659,30 @@ namespace UPOD.SERVICES.Services
                 technician!.IsBusy = true;
                 request!.RequestStatus = ProcessStatus.RESOLVING.ToString();
                 request!.UpdateDate = DateTime.UtcNow.AddHours(7);
+                var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
+                foreach (var item in admins)
+                {
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.RE.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "The request is resolving by technician!",
+                        CurrentObject_Id = request.Id,
+                        UserId = item.Id,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.Id);
+                }
+                await _notificationService.createNotification(new Notification
+                {
+                    isRead = false,
+                    ObjectName = ObjectName.RE.ToString(),
+                    CreatedTime = DateTime.UtcNow.AddHours(7),
+                    NotificationContent = "The request is resolving by technician!",
+                    CurrentObject_Id = request.Id,
+                    UserId = request.CustomerId,
+                });
+                await _notifyHub.Clients.All.SendAsync("ReceiveMessage", request.CustomerId);
                 var rs = await _context.SaveChangesAsync();
                 if (rs > 0)
                 {

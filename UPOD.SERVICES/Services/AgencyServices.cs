@@ -1,11 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.Contracts;
 using System.Linq.Dynamic.Core;
+using UPOD.API.HubService;
 using UPOD.REPOSITORIES.Models;
 using UPOD.REPOSITORIES.RequestModels;
 using UPOD.REPOSITORIES.ResponseModels;
 using UPOD.REPOSITORIES.ResponseViewModel;
+using UPOD.SERVICES.Enum;
 using UPOD.SERVICES.Helpers;
 
 namespace UPOD.SERVICES.Services
@@ -25,9 +28,14 @@ namespace UPOD.SERVICES.Services
     public class AgencyServices : IAgencyService
     {
         private readonly Database_UPODContext _context;
-        public AgencyServices(Database_UPODContext context)
+        private readonly INotificationService _notificationService;
+        private readonly IHubContext<NotifyHub> _notifyHub;
+
+        public AgencyServices(Database_UPODContext context, INotificationService notificationService, IHubContext<NotifyHub> notifyHub)
         {
             _context = context;
+            _notificationService = notificationService;
+            _notifyHub = notifyHub;
         }
         public async Task<ResponseModel<AgencyResponse>> GetListAgenciesByTechnician(PaginationRequest model, Guid id, SearchRequest value)
         {
@@ -269,8 +277,8 @@ namespace UPOD.SERVICES.Services
         {
             var agency = await _context.Agencies.Where(a => a.Id.Equals(id)).FirstOrDefaultAsync();
             var area = await _context.Areas.Where(a => a.Id.Equals(agency!.AreaId)).FirstOrDefaultAsync();
-            var total = await _context.Technicians.Where(a =>a.IsDelete == false && a.AreaId.Equals(area!.Id)).ToListAsync();
-            var technician = await _context.Technicians.Where(a =>a.IsDelete == false && a.AreaId.Equals(area!.Id)).Select(a => new TechnicianViewResponse
+            var total = await _context.Technicians.Where(a => a.IsDelete == false && a.AreaId.Equals(area!.Id)).ToListAsync();
+            var technician = await _context.Technicians.Where(a => a.IsDelete == false && a.AreaId.Equals(area!.Id)).Select(a => new TechnicianViewResponse
             {
                 id = a.Id,
                 code = a.Code,
@@ -395,6 +403,16 @@ namespace UPOD.SERVICES.Services
                 message = "Successfully";
                 status = 200;
                 await _context.Agencies.AddAsync(agency);
+                await _notificationService.createNotification(new Notification
+                {
+                    isRead = false,
+                    ObjectName = ObjectName.AG.ToString(),
+                    CreatedTime = DateTime.UtcNow.AddHours(7),
+                    NotificationContent = "You have become the main technician of the agency!",
+                    CurrentObject_Id = agency.Id,
+                    UserId = agency.TechnicianId,
+                });
+                await _notifyHub.Clients.All.SendAsync("ReceiveMessage", agency.TechnicianId);
                 var rs = await _context.SaveChangesAsync();
                 if (rs > 0)
                 {
@@ -466,7 +484,7 @@ namespace UPOD.SERVICES.Services
             var maintenance_schedules = await _context.MaintenanceSchedules.Where(a => a.IsDelete == false && a.AgencyId.Equals(id)).ToListAsync();
             foreach (var item in maintenance_schedules)
             {
-                if(item!.Status!.Equals("SCHEDULED") || item!.Status!.Equals("NOTIFIED"))
+                if (item!.Status!.Equals("SCHEDULED") || item!.Status!.Equals("NOTIFIED"))
                 {
                     item.IsDelete = true;
                 }
@@ -528,6 +546,23 @@ namespace UPOD.SERVICES.Services
         public async Task<ObjectModelResponse> UpdateAgency(Guid id, AgencyUpdateRequest model)
         {
             var agency = await _context.Agencies.Where(a => a.Id.Equals(id)).Include(x => x.Area).Include(x => x.Customer).Include(x => x.Devices).FirstOrDefaultAsync();
+            if (agency!.TechnicianId != model.technician_id)
+            {
+                var notify = await _context.Notifications.Where(a => a.CurrentObject_Id.Equals(agency.Id)
+                && a.ObjectName!.Equals(ObjectName.AG.ToString())
+                && a.UserId.Equals(agency!.TechnicianId)).FirstOrDefaultAsync();
+                _context.Notifications.Remove(notify!);
+                await _notificationService.createNotification(new Notification
+                {
+                    isRead = false,
+                    ObjectName = ObjectName.AG.ToString(),
+                    CreatedTime = DateTime.UtcNow.AddHours(7),
+                    NotificationContent = "You have become the main technician of the agency!",
+                    CurrentObject_Id = agency.Id,
+                    UserId = model.technician_id,
+                });
+                await _notifyHub.Clients.All.SendAsync("ReceiveMessage", model.technician_id);
+            }
             var data = new AgencyResponse();
             var message = "blank";
             var status = 500;

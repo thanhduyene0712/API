@@ -117,6 +117,17 @@ namespace UPOD.SERVICES.Services
             reportSchedule!.Status = ReportStatus.PROCESSING.ToString();
             reportSchedule!.IsProcessed = true;
             reportSchedule.UpdateDate = DateTime.UtcNow.AddHours(7);
+            var customerId = await _context.Agencies.Where(a => a.IsDelete == false && a.Id.Equals(reportSchedule.AgencyId)).Select(a => a.CustomerId).FirstOrDefaultAsync();
+            await _notificationService.createNotification(new Notification
+            {
+                isRead = false,
+                ObjectName = ObjectName.RE.ToString(),
+                CreatedTime = DateTime.UtcNow.AddHours(7),
+                NotificationContent = "Your maintenance report is processing by admin!",
+                CurrentObject_Id = reportSchedule.MaintenanceScheduleId,
+                UserId = customerId,
+            });
+            await _notifyHub.Clients.All.SendAsync("ReceiveMessage",customerId);
             var requests = new List<RequestCreateResponse>();
             if (reportServices.Count > 0)
             {
@@ -246,6 +257,16 @@ namespace UPOD.SERVICES.Services
                         ContractId = contract_id,
                         IsSystem = true,
                     };
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.RE.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "You have a new request need to resolve!",
+                        CurrentObject_Id = requestNew.Id,
+                        UserId = requestNew.CurrentTechnicianId,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", requestNew.CurrentTechnicianId);
                     await _context.Requests.AddAsync(requestNew);
                     requests.Add(new RequestCreateResponse
                     {
@@ -674,6 +695,31 @@ namespace UPOD.SERVICES.Services
                 maintenanceReport!.MaintenanceScheduleId = model.maintenance_schedule_id;
                 maintenanceReport!.UpdateDate = DateTime.UtcNow.AddHours(7);
                 maintenanceReport!.Status = ReportStatus.PENDING.ToString();
+                var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
+                foreach (var item in admins)
+                {
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.MR.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "The technician have been updated the maintenance report!",
+                        CurrentObject_Id = maintenanceReport.MaintenanceScheduleId,
+                        UserId = item.Id,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.Id);
+                }
+                var customerId = await _context.Agencies.Where(a => a.IsDelete == false && a.Id.Equals(maintainSchedule!.AgencyId)).Select(a => a.CustomerId).FirstOrDefaultAsync();
+                await _notificationService.createNotification(new Notification
+                {
+                    isRead = false,
+                    ObjectName = ObjectName.MS.ToString(),
+                    CreatedTime = DateTime.UtcNow.AddHours(7),
+                    NotificationContent = "The technician have been updated the maintenance report!",
+                    CurrentObject_Id = maintenanceReport.MaintenanceScheduleId,
+                    UserId = customerId,
+                });
+                await _notifyHub.Clients.All.SendAsync("ReceiveMessage", customerId);
                 var report_service_removes = await _context.MaintenanceReportServices.Where(a => a.MaintenanceReportId.Equals(maintenanceReport.Id)).ToListAsync();
                 foreach (var item in report_service_removes)
                 {
@@ -887,6 +933,51 @@ namespace UPOD.SERVICES.Services
                 var technician = await _context.Technicians.Where(x => x.Id.Equals(maintenanceReport!.CreateBy)).FirstOrDefaultAsync();
                 maintenanceReport!.Status = ReportStatus.PENDING.ToString();
                 technician!.IsBusy = false;
+                var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
+                foreach (var item in admins)
+                {
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.MS.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "You have a maintenance schedule completed!",
+                        CurrentObject_Id = maintenanceScheduleStatus.Id,
+                        UserId = item.Id,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.Id);
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.MR.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "You have a new maintenance report!",
+                        CurrentObject_Id = maintenanceScheduleStatus.Id,
+                        UserId = item.Id,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.Id);
+                }
+                var customerId = await _context.Agencies.Where(a => a.IsDelete == false && a.Id.Equals(maintenanceScheduleStatus.AgencyId)).Select(a => a.CustomerId).FirstOrDefaultAsync();
+                await _notificationService.createNotification(new Notification
+                {
+                    isRead = false,
+                    ObjectName = ObjectName.MS.ToString(),
+                    CreatedTime = DateTime.UtcNow.AddHours(7),
+                    NotificationContent = "You have a maintenance schedule completed!",
+                    CurrentObject_Id = maintenanceScheduleStatus.Id,
+                    UserId = customerId,
+                });
+                await _notifyHub.Clients.All.SendAsync("ReceiveMessage", customerId);
+                await _notificationService.createNotification(new Notification
+                {
+                    isRead = false,
+                    ObjectName = ObjectName.MR.ToString(),
+                    CreatedTime = DateTime.UtcNow.AddHours(7),
+                    NotificationContent = "You have a new maintenance report!",
+                    CurrentObject_Id = maintenanceScheduleStatus.Id,
+                    UserId = customerId,
+                });
+                await _notifyHub.Clients.All.SendAsync("ReceiveMessage", customerId);
                 foreach (var item in model.service)
                 {
                     var maintenanceReportService_id = Guid.NewGuid();
