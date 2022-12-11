@@ -38,7 +38,7 @@ namespace UPOD.SERVICES.Services
 
         public async Task CheckMaintenanceReport()
         {
-            var maintenanceReports = await _context.MaintenanceReports.Where(a => a.IsDelete == false).ToListAsync();
+            var maintenanceReports = await _context.MaintenanceReports.Where(a => a.IsDelete == false && a.Status.Equals("PENDING")).ToListAsync();
             var count = 0;
             if (maintenanceReports.Count > 0)
             {
@@ -69,7 +69,7 @@ namespace UPOD.SERVICES.Services
                                         ObjectName = ObjectName.MR.ToString(),
                                         CreatedTime = DateTime.UtcNow.AddHours(7),
                                         NotificationContent = "You have a maintenance report need to approve!",
-                                        CurrentObject_Id = item.Id,
+                                        CurrentObject_Id = item.MaintenanceScheduleId,
                                         UserId = item.CustomerId,
                                     });
                                     await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.CustomerId);
@@ -79,7 +79,7 @@ namespace UPOD.SERVICES.Services
                                         await _notificationService.createNotification(new Notification
                                         {
                                             isRead = false,
-                                            CurrentObject_Id = item.Id,
+                                            CurrentObject_Id = item.MaintenanceScheduleId,
                                             NotificationContent = "You have a maintenance report need to approve!",
                                             UserId = item.Id,
                                             ObjectName = ObjectName.MR.ToString(),
