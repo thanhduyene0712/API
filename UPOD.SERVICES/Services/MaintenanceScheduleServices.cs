@@ -927,9 +927,9 @@ namespace UPOD.SERVICES.Services
                 message = "Successfully";
                 status = 200;
                 maintenanceSchedule!.Description = model.description;
-                maintenanceSchedule!.MaintainTime = model.maintain_time;
+                maintenanceSchedule!.MaintainTime = model.maintain_time.Value.AddHours(7);
                 maintenanceSchedule!.TechnicianId = model.technician_id;
-                if (model.maintain_time.Value.Date >= date.AddDays(2).Date)
+                if (model.maintain_time.Value.AddHours(7).Date >= date.AddDays(2).Date)
                 {
                     maintenanceSchedule!.Status = ScheduleStatus.SCHEDULED.ToString();
                 }
