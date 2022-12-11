@@ -154,11 +154,6 @@ app.MapHub<NotifyHub>("/notifyHub");
 //    map.UseCors(MyAllowSpecificOrigins);
 //});
 
-//app.UseEndpoints(endpoint =>
-//{
-//    endpoint.MapHub<NotifyHub>("/notifyHub");
-//});
-
 app.MapControllers();
 
 app.Run();
