@@ -1,7 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using System.Data;
 using System.Linq.Dynamic.Core;
 using System.Net.Sockets;
+using UPOD.API.HubService;
 using UPOD.REPOSITORIES.Models;
 using UPOD.REPOSITORIES.RequestModels;
 using UPOD.REPOSITORIES.ResponseModels;
@@ -37,9 +39,12 @@ namespace UPOD.SERVICES.Services
     {
 
         private readonly Database_UPODContext _context;
-        public RequestServices(Database_UPODContext context)
+        private readonly IHubContext<NotifyHub> _notifyHub;
+
+        public RequestServices(Database_UPODContext context, IHubContext<NotifyHub> notifyHub)
         {
             _context = context;
+            _notifyHub = notifyHub;
         }
         public async Task<ObjectModelResponse> GetTicketDetails(Guid id)
         {
@@ -1048,7 +1053,30 @@ namespace UPOD.SERVICES.Services
                 ContractId = contract_id
             };
             var data = new RequestCreateResponse();
-
+            var noti_id = Guid.NewGuid();
+            while (true)
+            {
+                var noti_dup = await _context.Notifications.Where(x => x.Id.Equals(noti_id)).FirstOrDefaultAsync();
+                if (noti_dup == null)
+                {
+                    break;
+                }
+                else
+                {
+                    noti_id = Guid.NewGuid();
+                }
+            }
+            var notification = new Notification
+            {
+                Id = noti_id,
+                isRead = false,
+                NotificationContent = "You have a new Request!",
+                CreatedTime = DateTime.UtcNow.AddHours(7),
+                ObjectName = "RE",
+                CurrentObject_Id = request.Id,
+                UserId = request.CustomerId,
+            };
+            await _notifyHub.Clients.All.SendAsync("ReceiveMessage", notification.CurrentObject_Id);
             await _context.Requests.AddAsync(request);
             var rs = await _context.SaveChangesAsync();
             if (rs > 0)
