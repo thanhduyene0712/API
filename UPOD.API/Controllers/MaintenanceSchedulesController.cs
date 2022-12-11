@@ -56,7 +56,7 @@ namespace UPOD.API.Controllers
                         UserId = item.TechnicianId,
                         ObjectName = ObjectName.MS.ToString(),
                     });
-                    await _notifyHub.Clients.All.SendAsync("NotifyMessage", item.TechnicianId);
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.TechnicianId);
                 }
                 await _maintenanceSchedule_sv.SetMaintenanceSchedulesNotifyWarning();
                 await _maintenanceSchedule_sv.SetMaintenanceSchedulesNotifyMissing();
