@@ -73,6 +73,16 @@ namespace UPOD.SERVICES.Services
                                         UserId = item.CustomerId,
                                     });
                                     await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.CustomerId);
+                                    await _notificationService.createNotification(new Notification
+                                    {
+                                        isRead = false,
+                                        ObjectName = ObjectName.MR.ToString(),
+                                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                                        NotificationContent = "You have a maintenance report need to approve!",
+                                        CurrentObject_Id = item.MaintenanceScheduleId,
+                                        UserId = item.CreateBy,
+                                    });
+                                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.CreateBy);
                                     var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
                                     foreach (var item2 in admins)
                                     {
@@ -81,7 +91,7 @@ namespace UPOD.SERVICES.Services
                                             isRead = false,
                                             CurrentObject_Id = item.MaintenanceScheduleId,
                                             NotificationContent = "You have a maintenance report need to approve!",
-                                            UserId = item.Id,
+                                            UserId = item2.Id,
                                             ObjectName = ObjectName.MR.ToString(),
                                         });
                                         await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item2.Id);
