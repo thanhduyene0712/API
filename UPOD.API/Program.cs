@@ -155,5 +155,4 @@ app.MapHub<NotifyHub>("/notifyHub");
 //});
 
 app.MapControllers();
-
 app.Run();
