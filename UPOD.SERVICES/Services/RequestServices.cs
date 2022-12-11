@@ -1065,15 +1065,6 @@ namespace UPOD.SERVICES.Services
                 ContractId = contract_id
             };
             var data = new RequestCreateResponse();
-            await _notificationService.createNotification(new Notification
-            {
-                isRead = false,
-                CurrentObject_Id = request.Id,
-                NotificationContent = "You have a new request!",
-                UserId = request.CustomerId,
-                ObjectName = ObjectName.RE.ToString(),
-            });
-            await _notifyHub.Clients.All.SendAsync("ReceiveMessage", request.CustomerId);
             var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
             foreach (var item in admins)
             {
