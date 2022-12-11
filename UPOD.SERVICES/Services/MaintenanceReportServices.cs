@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
 using System.Net.Sockets;
+using UPOD.API.HubService;
 using UPOD.REPOSITORIES.Models;
 using UPOD.REPOSITORIES.RequestModels;
 using UPOD.REPOSITORIES.ResponseModels;
@@ -24,9 +26,14 @@ namespace UPOD.SERVICES.Services
     public class MaintenanceReportServices : IMaintenanceReportService
     {
         private readonly Database_UPODContext _context;
-        public MaintenanceReportServices(Database_UPODContext context)
+        private readonly IHubContext<NotifyHub> _notifyHub;
+        private readonly INotificationService _notificationService;
+
+        public MaintenanceReportServices(Database_UPODContext context, IHubContext<NotifyHub> notifyHub, INotificationService notificationService)
         {
             _context = context;
+            _notifyHub = notifyHub;
+            _notificationService = notificationService;
         }
 
         public async Task CheckMaintenanceReport()
@@ -57,6 +64,29 @@ namespace UPOD.SERVICES.Services
                                     count = 0;
                                     item.IsProcessed = true;
                                 }
+                            }
+                            await _notificationService.createNotification(new Notification
+                            {
+                                isRead = false,
+                                ObjectName = ObjectName.MR.ToString(),
+                                CreatedTime = DateTime.UtcNow.AddHours(7),
+                                NotificationContent = "You have a maintenance report need to approve!",
+                                CurrentObject_Id = item.Id,
+                                UserId = item.CustomerId,
+                            });
+                            await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.CustomerId);
+                            var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
+                            foreach (var item2 in admins)
+                            {
+                                await _notificationService.createNotification(new Notification
+                                {
+                                    isRead = false,
+                                    CurrentObject_Id = item.Id,
+                                    NotificationContent = "You have a maintenance report need to approve!",
+                                    UserId = item.Id,
+                                    ObjectName = ObjectName.MR.ToString(),
+                                });
+                                await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item2.Id);
                             }
                         }
                     }

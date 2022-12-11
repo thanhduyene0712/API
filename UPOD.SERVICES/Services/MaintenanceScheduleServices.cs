@@ -392,6 +392,41 @@ namespace UPOD.SERVICES.Services
                     {
                         technician!.Breach = technician!.Breach + 1;
                     }
+                    var customerId = await _context.Agencies.Where(a => a.IsDelete == false && a.Id.Equals(item.AgencyId)).Select(a => a.CustomerId).FirstOrDefaultAsync();
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.MS.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "Maintenance Schedule warning because the technician have no action!",
+                        CurrentObject_Id = item.Id,
+                        UserId = customerId,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", customerId);
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.MS.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "Maintenance Schedule warning because the technician have no action!",
+                        CurrentObject_Id = item.Id,
+                        UserId = item.TechnicianId,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.TechnicianId);
+                    var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
+                    foreach (var item1 in admins)
+                    {
+                        await _notificationService.createNotification(new Notification
+                        {
+                            isRead = false,
+                            ObjectName = ObjectName.MS.ToString(),
+                            CreatedTime = DateTime.UtcNow.AddHours(7),
+                            NotificationContent = "Maintenance Schedule warning because the technician have no action!",
+                            CurrentObject_Id = item.Id,
+                            UserId = item1.Id,
+                        });
+                        await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item1.Id);
+                    }
                     await _context.SaveChangesAsync();
                 }
             }
@@ -406,6 +441,31 @@ namespace UPOD.SERVICES.Services
                 {
                     item.UpdateDate = DateTime.UtcNow.AddHours(7);
                     item.Status = ScheduleStatus.MISSED.ToString();
+                    var customerId = await _context.Agencies.Where(a => a.IsDelete == false && a.Id.Equals(item.AgencyId)).Select(a => a.CustomerId).FirstOrDefaultAsync();
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.MS.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "You have maintenance schedule is missed!",
+                        CurrentObject_Id = item.Id,
+                        UserId = customerId,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", customerId);
+                    var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
+                    foreach (var item1 in admins)
+                    {
+                        await _notificationService.createNotification(new Notification
+                        {
+                            isRead = false,
+                            ObjectName = ObjectName.MS.ToString(),
+                            CreatedTime = DateTime.UtcNow.AddHours(7),
+                            NotificationContent = "You have maintenance schedule is missed",
+                            CurrentObject_Id = item.Id,
+                            UserId = item1.Id,
+                        });
+                        await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item1.Id);
+                    }
                     await _context.SaveChangesAsync();
                 }
             }

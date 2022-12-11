@@ -1384,6 +1384,40 @@ namespace UPOD.SERVICES.Services
                 {
                     item!.UpdateDate = DateTime.UtcNow.AddHours(7);
                     item!.RequestStatus = ProcessStatus.COMPLETED.ToString();
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.RE.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "You have a request is completed!",
+                        CurrentObject_Id = item.Id,
+                        UserId = item.CustomerId,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.CustomerId);
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.RE.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "You have a request is completed!",
+                        CurrentObject_Id = item.Id,
+                        UserId = item.CurrentTechnicianId,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.CurrentTechnicianId);
+                    var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
+                    foreach (var item1 in admins)
+                    {
+                        await _notificationService.createNotification(new Notification
+                        {
+                            isRead = false,
+                            ObjectName = ObjectName.RE.ToString(),
+                            CreatedTime = DateTime.UtcNow.AddHours(7),
+                            NotificationContent = "You have a request is completed!",
+                            CurrentObject_Id = item.Id,
+                            UserId = item1.Id,
+                        });
+                        await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item1.Id);
+                    }
                 }
                 await _context.SaveChangesAsync();
             }

@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.Contracts;
 using System.Linq.Dynamic.Core;
+using UPOD.API.HubService;
 using UPOD.REPOSITORIES.Models;
 using UPOD.REPOSITORIES.RequestModels;
 using UPOD.REPOSITORIES.ResponseModels;
@@ -26,9 +28,14 @@ namespace UPOD.SERVICES.Services
     public class ContractServiceService : IContractServiceService
     {
         private readonly Database_UPODContext _context;
-        public ContractServiceService(Database_UPODContext context)
+        private readonly INotificationService _notificationService;
+        private readonly IHubContext<NotifyHub> _notifyHub;
+
+        public ContractServiceService(Database_UPODContext context, INotificationService notificationService, IHubContext<NotifyHub> notifyHub)
         {
             _context = context;
+            _notificationService = notificationService;
+            _notifyHub = notifyHub;
         }
         public async Task<ResponseModel<ServiceResponse>> GetServiceByContractId(Guid id)
         {
@@ -66,6 +73,30 @@ namespace UPOD.SERVICES.Services
                     {
                         item1.IsDelete = true;
                     }
+                }
+                await _notificationService.createNotification(new Notification
+                {
+                    isRead = false,
+                    ObjectName = ObjectName.CON.ToString(),
+                    CreatedTime = DateTime.UtcNow.AddHours(7),
+                    NotificationContent = "You have a contract is expired!",
+                    CurrentObject_Id = item.Id,
+                    UserId = item.CustomerId,
+                });
+                await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.CustomerId);
+                var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
+                foreach (var item1 in admins)
+                {
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.CON.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "A Contract of Customer is expired!",
+                        CurrentObject_Id = item.Id,
+                        UserId = item1.Id,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item1.Id);
                 }
             }
             await _context.SaveChangesAsync();
