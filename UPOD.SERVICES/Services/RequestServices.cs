@@ -1493,7 +1493,7 @@ namespace UPOD.SERVICES.Services
         {
             var requests = await _context.Requests.Where(a => a.IsDelete == false
             && a.RequestStatus!.Equals("PREPARING")
-            && a.UpdateDate!.Value.AddMinutes(10) <= DateTime.UtcNow.AddHours(7)).ToListAsync();
+            && a.UpdateDate!.Value.AddMinutes(1) <= DateTime.UtcNow.AddHours(7)).ToListAsync();
             if (requests.Count > 0)
             {
 

@@ -1613,7 +1613,7 @@ namespace UPOD.SERVICES.Services
                             isRead = false,
                             ObjectName = ObjectName.RE.ToString(),
                             CreatedTime = DateTime.UtcNow.AddHours(7),
-                            NotificationContent = "The technician " + " '" + tech!.TechnicianName + "," + tech.Code + "'  have been rejected a request",
+                            NotificationContent = "The technician " + " '" + tech!.Code + "'  have been rejected a request",
                             CurrentObject_Id = request.Id,
                             UserId = item.Id,
                         });
