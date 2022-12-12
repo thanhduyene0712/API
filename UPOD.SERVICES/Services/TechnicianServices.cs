@@ -1586,14 +1586,8 @@ namespace UPOD.SERVICES.Services
                         });
                     }
                 }
+
                 technicians.OrderBy(a => a.number_of_requests).Except(currentTechnician).ToList();
-                if (technicians.Count > 0)
-                {
-                    request!.UpdateDate = DateTime.UtcNow.AddHours(7);
-                    request!.StartTime = DateTime.UtcNow.AddHours(7);
-                    request!.RequestStatus = ProcessStatus.PREPARING.ToString();
-                    request!.CurrentTechnicianId = technicians.FirstOrDefault()!.id;
-                }
                 if (request!.CurrentTechnicianId != technicians.FirstOrDefault()!.id)
                 {
                     var notify = await _context.Notifications.Where(a => a.CurrentObject_Id.Equals(request.Id)
@@ -1610,7 +1604,30 @@ namespace UPOD.SERVICES.Services
                         UserId = technicians.FirstOrDefault()!.id,
                     });
                     await _notifyHub.Clients.All.SendAsync("ReceiveMessage", technicians.FirstOrDefault()!.id);
+                    var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
+                    var tech = await _context.Technicians.Where(a => a.IsDelete == false && a.Id.Equals(request.CurrentTechnicianId)).FirstOrDefaultAsync();
+                    foreach (var item in admins)
+                    {
+                        await _notificationService.createNotification(new Notification
+                        {
+                            isRead = false,
+                            ObjectName = ObjectName.RE.ToString(),
+                            CreatedTime = DateTime.UtcNow.AddHours(7),
+                            NotificationContent = "The technician " + " '" + tech!.TechnicianName + "," + tech.Code + "'  have been rejected a request",
+                            CurrentObject_Id = request.Id,
+                            UserId = item.Id,
+                        });
+                        await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.Id);
+                    }
                 }
+                if (technicians.Count > 0)
+                {
+                    request!.UpdateDate = DateTime.UtcNow.AddHours(7);
+                    request!.StartTime = DateTime.UtcNow.AddHours(7);
+                    request!.RequestStatus = ProcessStatus.PREPARING.ToString();
+                    request!.CurrentTechnicianId = technicians.FirstOrDefault()!.id;
+                }
+
                 var rs = await _context.SaveChangesAsync();
                 if (rs > 0)
                 {

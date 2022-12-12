@@ -141,6 +141,31 @@ namespace UPOD.SERVICES.Services
                 technician!.IsBusy = true;
                 maintenanceSchedule!.Status = ScheduleStatus.PREPARING.ToString();
                 maintenanceSchedule!.UpdateDate = DateTime.UtcNow.AddHours(7);
+                var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
+                foreach (var item in admins)
+                {
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.MS.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "The technician accept the maintenance schedule!",
+                        CurrentObject_Id = maintenanceSchedule!.Id,
+                        UserId = item.Id,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.Id);
+                }
+                var customerId = await _context.Agencies.Where(a => a.IsDelete == false && a.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.CustomerId).FirstOrDefaultAsync();
+                await _notificationService.createNotification(new Notification
+                {
+                    isRead = false,
+                    ObjectName = ObjectName.MS.ToString(),
+                    CreatedTime = DateTime.UtcNow.AddHours(7),
+                    NotificationContent = "The technician accept the maintenance schedule!",
+                    CurrentObject_Id = maintenanceSchedule!.Id,
+                    UserId = customerId,
+                });
+                await _notifyHub.Clients.All.SendAsync("ReceiveMessage", customerId);
                 var rs = await _context.SaveChangesAsync();
                 if (rs > 0)
                 {
@@ -212,6 +237,31 @@ namespace UPOD.SERVICES.Services
                 maintenanceSchedule!.Status = ScheduleStatus.MAINTAINING.ToString();
                 maintenanceSchedule.StartDate = DateTime.UtcNow.AddHours(7);
                 maintenanceSchedule!.UpdateDate = DateTime.UtcNow.AddHours(7);
+                var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
+                foreach (var item in admins)
+                {
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.MS.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "You have a maintenance schedule is maintaining!",
+                        CurrentObject_Id = maintenanceSchedule!.Id,
+                        UserId = item.Id,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.Id);
+                }
+                var customerId = await _context.Agencies.Where(a => a.IsDelete == false && a.Id.Equals(maintenanceSchedule.AgencyId)).Select(a => a.CustomerId).FirstOrDefaultAsync();
+                await _notificationService.createNotification(new Notification
+                {
+                    isRead = false,
+                    ObjectName = ObjectName.MS.ToString(),
+                    CreatedTime = DateTime.UtcNow.AddHours(7),
+                    NotificationContent = "You have a maintenance schedule is maintaining!",
+                    CurrentObject_Id = maintenanceSchedule!.Id,
+                    UserId = customerId,
+                });
+                await _notifyHub.Clients.All.SendAsync("ReceiveMessage", customerId);
                 var rs = await _context.SaveChangesAsync();
                 if (rs > 0)
                 {
