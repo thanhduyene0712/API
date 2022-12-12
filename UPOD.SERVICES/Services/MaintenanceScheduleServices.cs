@@ -1076,6 +1076,16 @@ namespace UPOD.SERVICES.Services
                 else if (model.maintain_time.Value.AddHours(7).Date == DateTime.UtcNow.AddHours(7).AddDays(2).Date)
                 {
                     maintenanceSchedule!.Status = ScheduleStatus.NOTIFIED.ToString();
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.MS.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "You have a maintenance schedule coming up!",
+                        CurrentObject_Id = maintenanceSchedule.Id,
+                        UserId = model.technician_id,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", model.technician_id);
                 }
                 maintenanceSchedule.UpdateDate = DateTime.UtcNow.AddHours(7);
                 var rs = await _context.SaveChangesAsync();
