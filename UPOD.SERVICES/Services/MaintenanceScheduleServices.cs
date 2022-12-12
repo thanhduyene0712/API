@@ -1058,7 +1058,7 @@ namespace UPOD.SERVICES.Services
                         isRead = false,
                         ObjectName = ObjectName.MS.ToString(),
                         CreatedTime = DateTime.UtcNow.AddHours(7),
-                        NotificationContent = "Your maintenance schedule have been update time!",
+                        NotificationContent = "Your maintenance schedule have been update maintenance time!",
                         CurrentObject_Id = maintenanceSchedule.Id,
                         UserId = model.technician_id,
                     });
