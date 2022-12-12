@@ -1027,9 +1027,9 @@ namespace UPOD.SERVICES.Services
             var message = "blank";
             var status = 500;
             var data = new MaintenanceScheduleResponse();
-            if (model.maintain_time!.Value.Date < DateTime.UtcNow.AddHours(7).Date)
+            if (model.maintain_time!.Value.Date < DateTime.UtcNow.AddHours(7).AddDays(2).Date)
             {
-                message = "Maintain time must be greater than current day";
+                message = "The new maintenance time must be 2 days older than the current date";
                 status = 400;
             }
             else
