@@ -382,7 +382,7 @@ namespace UPOD.SERVICES.Services
         public async Task SetMaintenanceSchedulesNotify()
         {
             var todaySchedules = await _context.MaintenanceSchedules.Where(a => a.MaintainTime!.Value.Date <= DateTime.UtcNow.AddHours(7).AddDays(2).Date && a.IsDelete == false && a.Status.Equals("SCHEDULED")).ToListAsync();
-            if(todaySchedules.Count > 0)
+            if (todaySchedules.Count > 0)
             {
                 foreach (var item in todaySchedules)
                 {
@@ -1051,14 +1051,31 @@ namespace UPOD.SERVICES.Services
                     });
                     await _notifyHub.Clients.All.SendAsync("ReceiveMessage", model.technician_id);
                 }
+                if (maintenanceSchedule!.MaintainTime.Value.Date != model.maintain_time.Value.AddHours(7).Date)
+                {
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.MS.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "Your maintenance schedule have been update time!",
+                        CurrentObject_Id = maintenanceSchedule.Id,
+                        UserId = model.technician_id,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", model.technician_id);
+                }
                 message = "Successfully";
                 status = 200;
                 maintenanceSchedule!.Description = model.description;
                 maintenanceSchedule!.MaintainTime = model.maintain_time.Value.AddHours(7);
                 maintenanceSchedule!.TechnicianId = model.technician_id;
-                if (model.maintain_time.Value.AddHours(7).Date >= date.AddDays(2).Date)
+                if (model.maintain_time.Value.AddHours(7).Date > DateTime.UtcNow.AddHours(7).AddDays(2).Date)
                 {
                     maintenanceSchedule!.Status = ScheduleStatus.SCHEDULED.ToString();
+                }
+                else if (model.maintain_time.Value.AddHours(7).Date == DateTime.UtcNow.AddHours(7).AddDays(2).Date)
+                {
+                    maintenanceSchedule!.Status = ScheduleStatus.NOTIFIED.ToString();
                 }
                 maintenanceSchedule.UpdateDate = DateTime.UtcNow.AddHours(7);
                 var rs = await _context.SaveChangesAsync();
