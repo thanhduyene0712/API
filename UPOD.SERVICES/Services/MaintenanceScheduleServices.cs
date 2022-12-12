@@ -392,7 +392,7 @@ namespace UPOD.SERVICES.Services
                     {
                         isRead = false,
                         CurrentObject_Id = item.Id,
-                        NotificationContent = "You have a maintenance schedule for today!",
+                        NotificationContent = "You have a maintenance schedule coming up!",
                         UserId = item.TechnicianId,
                         ObjectName = ObjectName.MS.ToString(),
                     });
@@ -404,7 +404,7 @@ namespace UPOD.SERVICES.Services
                         {
                             isRead = false,
                             CurrentObject_Id = item.Id,
-                            NotificationContent = "You have a maintenance schedule for today!",
+                            NotificationContent = "You have a maintenance schedule coming up!",
                             UserId = item1.Id,
                             ObjectName = ObjectName.MS.ToString(),
                         });
@@ -415,7 +415,7 @@ namespace UPOD.SERVICES.Services
                     {
                         isRead = false,
                         CurrentObject_Id = item.Id,
-                        NotificationContent = "You have a maintenance schedule for today!",
+                        NotificationContent = "You have a maintenance schedule coming up!",
                         UserId = customerId,
                         ObjectName = ObjectName.MS.ToString(),
                     });
@@ -1034,6 +1034,23 @@ namespace UPOD.SERVICES.Services
             }
             else
             {
+                if (maintenanceSchedule!.TechnicianId != model.technician_id)
+                {
+                    var notify = await _context.Notifications.Where(a => a.CurrentObject_Id.Equals(maintenanceSchedule.Id)
+                    && a.ObjectName!.Equals(ObjectName.MS.ToString())
+                    && a.UserId.Equals(maintenanceSchedule!.TechnicianId)).FirstOrDefaultAsync();
+                    _context.Notifications.Remove(notify!);
+                    await _notificationService.createNotification(new Notification
+                    {
+                        isRead = false,
+                        ObjectName = ObjectName.MS.ToString(),
+                        CreatedTime = DateTime.UtcNow.AddHours(7),
+                        NotificationContent = "You are scheduled a new maintenance schedule!",
+                        CurrentObject_Id = maintenanceSchedule.Id,
+                        UserId = model.technician_id,
+                    });
+                    await _notifyHub.Clients.All.SendAsync("ReceiveMessage", model.technician_id);
+                }
                 message = "Successfully";
                 status = 200;
                 maintenanceSchedule!.Description = model.description;
