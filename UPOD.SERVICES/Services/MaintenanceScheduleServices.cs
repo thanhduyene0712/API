@@ -1051,7 +1051,7 @@ namespace UPOD.SERVICES.Services
                     });
                     await _notifyHub.Clients.All.SendAsync("ReceiveMessage", model.technician_id);
                 }
-                if (maintenanceSchedule!.MaintainTime.Value.Date != model.maintain_time.Value.AddHours(7).Date)
+                if (maintenanceSchedule!.MaintainTime.Value.Date != model.maintain_time.Value.Date)
                 {
                     await _notificationService.createNotification(new Notification
                     {
@@ -1066,11 +1066,11 @@ namespace UPOD.SERVICES.Services
                 }
                 message = "Successfully";
                 status = 200;
-                if (model.maintain_time.Value.AddHours(7).Date > DateTime.UtcNow.AddHours(7).AddDays(2).Date)
+                if (model.maintain_time.Value.Date > DateTime.UtcNow.AddHours(7).AddDays(2).Date)
                 {
                     maintenanceSchedule!.Status = ScheduleStatus.SCHEDULED.ToString();
                 }
-                else if ((model.maintain_time.Value.AddHours(7).Date == DateTime.UtcNow.AddHours(7).AddDays(2).Date) && (maintenanceSchedule!.MaintainTime.Value.Date != model.maintain_time.Value.AddHours(7).Date))
+                else if ((model.maintain_time.Value.Date == DateTime.UtcNow.AddHours(7).AddDays(2).Date) && (maintenanceSchedule!.MaintainTime.Value.Date != model.maintain_time.Value.Date))
                 {
                     maintenanceSchedule!.Status = ScheduleStatus.NOTIFIED.ToString();
                     await _notificationService.createNotification(new Notification
@@ -1085,7 +1085,7 @@ namespace UPOD.SERVICES.Services
                     await _notifyHub.Clients.All.SendAsync("ReceiveMessage", model.technician_id);
                 }
                 maintenanceSchedule!.Description = model.description;
-                maintenanceSchedule!.MaintainTime = model.maintain_time.Value.AddHours(7);
+                maintenanceSchedule!.MaintainTime = model.maintain_time.Value;
                 maintenanceSchedule!.TechnicianId = model.technician_id;
                 maintenanceSchedule.UpdateDate = DateTime.UtcNow.AddHours(7);
                 var rs = await _context.SaveChangesAsync();
