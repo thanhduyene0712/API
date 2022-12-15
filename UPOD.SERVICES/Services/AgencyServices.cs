@@ -548,10 +548,6 @@ namespace UPOD.SERVICES.Services
             var agency = await _context.Agencies.Where(a => a.Id.Equals(id)).Include(x => x.Area).Include(x => x.Customer).Include(x => x.Devices).FirstOrDefaultAsync();
             if (agency!.TechnicianId != model.technician_id)
             {
-                var notify = await _context.Notifications.Where(a => a.CurrentObject_Id.Equals(agency.Id)
-                && a.ObjectName!.Equals(ObjectName.AG.ToString())
-                && a.UserId.Equals(agency!.TechnicianId)).FirstOrDefaultAsync();
-                _context.Notifications.Remove(notify!);
                 await _notificationService.createNotification(new Notification
                 {
                     isRead = false,

@@ -1329,10 +1329,6 @@ namespace UPOD.SERVICES.Services
             var request = await _context.Requests.Where(a => a.Id.Equals(id)).FirstOrDefaultAsync();
             if (request!.CurrentTechnicianId != model.technician_id)
             {
-                var notify = await _context.Notifications.Where(a => a.CurrentObject_Id.Equals(request.Id)
-                && a.ObjectName.Equals(ObjectName.RE.ToString())
-                && a.UserId.Equals(request!.CurrentTechnicianId)).FirstOrDefaultAsync();
-                _context.Notifications.Remove(notify!);
                 await _notificationService.createNotification(new Notification
                 {
                     isRead = false,

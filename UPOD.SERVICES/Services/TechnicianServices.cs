@@ -1590,10 +1590,6 @@ namespace UPOD.SERVICES.Services
                 technicians.OrderBy(a => a.number_of_requests).Except(currentTechnician).ToList();
                 if (request!.CurrentTechnicianId != technicians.FirstOrDefault()!.id)
                 {
-                    var notify = await _context.Notifications.Where(a => a.CurrentObject_Id.Equals(request.Id)
-                    && a.ObjectName.Equals(ObjectName.RE.ToString())
-                    && a.UserId.Equals(request!.CurrentTechnicianId)).FirstOrDefaultAsync();
-                    _context.Notifications.Remove(notify!);
                     await _notificationService.createNotification(new Notification
                     {
                         isRead = false,

@@ -1036,10 +1036,6 @@ namespace UPOD.SERVICES.Services
             {
                 if (maintenanceSchedule!.TechnicianId != model.technician_id)
                 {
-                    var notify = await _context.Notifications.Where(a => a.CurrentObject_Id.Equals(maintenanceSchedule.Id)
-                    && a.ObjectName!.Equals(ObjectName.MS.ToString())
-                    && a.UserId.Equals(maintenanceSchedule!.TechnicianId)).FirstOrDefaultAsync();
-                    _context.Notifications.Remove(notify!);
                     await _notificationService.createNotification(new Notification
                     {
                         isRead = false,
