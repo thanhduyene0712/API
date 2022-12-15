@@ -981,6 +981,16 @@ namespace UPOD.SERVICES.Services
                 UserId = technician_id,
             });
             await _notifyHub.Clients.All.SendAsync("ReceiveMessage", technician_id);
+            await _notificationService.createNotification(new Notification
+            {
+                isRead = false,
+                ObjectName = ObjectName.RE.ToString(),
+                CreatedTime = DateTime.UtcNow.AddHours(7),
+                NotificationContent = "Your request have been confirmed!",
+                CurrentObject_Id = request.Id,
+                UserId = request.CustomerId,
+            });
+            await _notifyHub.Clients.All.SendAsync("ReceiveMessage", request.CustomerId);
             var rs = await _context.SaveChangesAsync();
             if (rs > 0)
             {
