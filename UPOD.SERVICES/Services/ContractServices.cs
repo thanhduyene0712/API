@@ -40,7 +40,8 @@ namespace UPOD.SERVICES.Services
         public async Task<ResponseModel<ServiceResponse>> GetServiceByContractId(Guid id)
         {
 
-            var services = await _context.ContractServices.Where(x => x.Contract!.Id.Equals(id)).Select(x => new ServiceResponse
+            var services = await _context.ContractServices.Where(x => x.Contract!.Id.Equals(id) && (x.Contract.StartDate!.Value.Date <= DateTime.UtcNow.AddHours(7).Date
+            && x.Contract.EndDate!.Value.Date >= DateTime.UtcNow.AddHours(7).Date)).Select(x => new ServiceResponse
             {
                 id = x.ServiceId,
                 code = x.Service!.Code,

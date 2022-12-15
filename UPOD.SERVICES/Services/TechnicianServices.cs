@@ -1680,7 +1680,7 @@ namespace UPOD.SERVICES.Services
                         isRead = false,
                         ObjectName = ObjectName.RE.ToString(),
                         CreatedTime = DateTime.UtcNow.AddHours(7),
-                        NotificationContent = "The request is resolving by technician!",
+                        NotificationContent = "The request is resolving!",
                         CurrentObject_Id = request.Id,
                         UserId = item.Id,
                     });
@@ -1691,7 +1691,7 @@ namespace UPOD.SERVICES.Services
                     isRead = false,
                     ObjectName = ObjectName.RE.ToString(),
                     CreatedTime = DateTime.UtcNow.AddHours(7),
-                    NotificationContent = "The request is resolving by technician!",
+                    NotificationContent = "The request have been accepted!",
                     CurrentObject_Id = request.Id,
                     UserId = request.CustomerId,
                 });
