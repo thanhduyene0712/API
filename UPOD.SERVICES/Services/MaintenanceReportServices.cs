@@ -121,7 +121,7 @@ namespace UPOD.SERVICES.Services
             await _notificationService.createNotification(new Notification
             {
                 isRead = false,
-                ObjectName = ObjectName.RE.ToString(),
+                ObjectName = ObjectName.MR.ToString(),
                 CreatedTime = DateTime.UtcNow.AddHours(7),
                 NotificationContent = "Your maintenance report is processing by admin!",
                 CurrentObject_Id = reportSchedule.MaintenanceScheduleId,
