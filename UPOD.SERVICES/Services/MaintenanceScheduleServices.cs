@@ -1027,9 +1027,17 @@ namespace UPOD.SERVICES.Services
             var message = "blank";
             var status = 500;
             var data = new MaintenanceScheduleResponse();
-            if (model.maintain_time!.Value.Date < DateTime.UtcNow.AddHours(7).AddDays(2).Date)
+            var con = await _context.Contracts.Where(a => a.IsAccepted == true
+            && a.IsExpire == false
+            && a.IsDelete == false
+            && a.Id.Equals(maintenanceSchedule.ContractId)).FirstOrDefaultAsync();
+            if (model.maintain_time!.Value.AddHours(7).Date < DateTime.UtcNow.AddHours(7).AddDays(2).Date)
             {
                 message = "The new maintenance time must be 2 days older than the current date";
+                status = 400;
+            }else if (model.maintain_time!.Value.AddHours(7).Date < con!.StartDate!.Value.Date)
+            {
+                message = "The new maintenance time must be greater than the start date of contract";
                 status = 400;
             }
             else
