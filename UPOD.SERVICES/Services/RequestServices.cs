@@ -1386,7 +1386,7 @@ namespace UPOD.SERVICES.Services
             request!.RequestStatus = ProcessStatus.CANCELED.ToString();
             request!.UpdateDate = DateTime.UtcNow.AddHours(7);
             var data = new ResolvingRequestResponse();
-            if (request.AdminId == null || request.IsSystem == false)
+            if (request.AdminId == null && request.IsSystem == false)
             {
                 var admins = await _context.Admins.Where(a => a.IsDelete == false).ToListAsync();
                 foreach (var item in admins)
