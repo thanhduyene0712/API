@@ -1035,9 +1035,9 @@ namespace UPOD.SERVICES.Services
             {
                 message = "The new maintenance time must be 2 days older than the current date";
                 status = 400;
-            }else if (model.maintain_time!.Value.AddHours(7).Date < con!.StartDate!.Value.Date)
+            }else if (model.maintain_time!.Value.AddHours(7).Date < con!.StartDate!.Value.AddDays(2).Date)
             {
-                message = "The new maintenance time must be greater than the start date of contract";
+                message = "The new maintenance time must be 2 days older than the start date of contract";
                 status = 400;
             }
             else
