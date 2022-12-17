@@ -78,7 +78,7 @@ namespace UPOD.SERVICES.Services
                                         isRead = false,
                                         ObjectName = ObjectName.MR.ToString(),
                                         CreatedTime = DateTime.UtcNow.AddHours(7),
-                                        NotificationContent = "You have a maintenance report need to approve!",
+                                        NotificationContent = "You have a maintenance report need the customer approve!",
                                         CurrentObject_Id = item.MaintenanceScheduleId,
                                         UserId = item.CreateBy,
                                     });
@@ -90,7 +90,7 @@ namespace UPOD.SERVICES.Services
                                         {
                                             isRead = false,
                                             CurrentObject_Id = item.MaintenanceScheduleId,
-                                            NotificationContent = "You have a maintenance report need to approve!",
+                                            NotificationContent = "You have a maintenance report need the customer approve!",
                                             UserId = item2.Id,
                                             ObjectName = ObjectName.MR.ToString(),
                                         });
