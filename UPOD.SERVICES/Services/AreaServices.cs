@@ -200,10 +200,11 @@ namespace UPOD.SERVICES.Services
                     skills = item.skills,
                 });
             }
+            areaOfTech.Skip((model.PageNumber - 1) * model.PageSize).Take(model.PageSize).OrderBy(x => x.number_of_requests).ToList();
             var technicians = new List<TechnicianViewResponse>();
             var technician_check = new List<TechnicianViewResponse>();
             var technician_compares = customer_technicians.Where(i => skillOfTech.Contains(i)).ToList();
-            technician_check = areaOfTech.Where(i => technician_compares.Contains(i)).Skip((model.PageNumber - 1) * model.PageSize).Take(model.PageSize).ToList();
+            technician_check = areaOfTech.Where(i => technician_compares.Contains(i)).Skip((model.PageNumber - 1) * model.PageSize).Take(model.PageSize).OrderBy(x=>x.number_of_requests).ToList();
             var total = areaOfTech.Where(i => technician_compares.Contains(i)).ToList();
             if (technician_check.Count > 0)
             {
