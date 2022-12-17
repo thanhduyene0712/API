@@ -1402,6 +1402,16 @@ namespace UPOD.SERVICES.Services
                     });
                     await _notifyHub.Clients.All.SendAsync("ReceiveMessage", item.Id);
                 }
+                await _notificationService.createNotification(new Notification
+                {
+                    isRead = false,
+                    ObjectName = ObjectName.RE.ToString(),
+                    CreatedTime = DateTime.UtcNow.AddHours(7),
+                    NotificationContent = "You have a request canceled!",
+                    CurrentObject_Id = request.Id,
+                    UserId = request.CurrentTechnicianId,
+                });
+                await _notifyHub.Clients.All.SendAsync("ReceiveMessage", request.CurrentTechnicianId);
             }
             else
             {
@@ -1415,6 +1425,16 @@ namespace UPOD.SERVICES.Services
                     UserId = request.CustomerId,
                 });
                 await _notifyHub.Clients.All.SendAsync("ReceiveMessage", request.CustomerId);
+                await _notificationService.createNotification(new Notification
+                {
+                    isRead = false,
+                    ObjectName = ObjectName.RE.ToString(),
+                    CreatedTime = DateTime.UtcNow.AddHours(7),
+                    NotificationContent = "You have a request canceled!",
+                    CurrentObject_Id = request.Id,
+                    UserId = request.CurrentTechnicianId,
+                });
+                await _notifyHub.Clients.All.SendAsync("ReceiveMessage", request.CurrentTechnicianId);
             }
             var rs = await _context.SaveChangesAsync();
             if (rs > 0)
