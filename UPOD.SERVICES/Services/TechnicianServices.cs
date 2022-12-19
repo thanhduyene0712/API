@@ -59,6 +59,7 @@ namespace UPOD.SERVICES.Services
                 && (a.RequestStatus!.Equals("WARNING")
                 || a.RequestStatus!.Equals("PREPARING")
                 || a.RequestStatus!.Equals("RESOLVING")
+                || a.RequestStatus!.Equals("CANCELED")
                 || a.RequestStatus!.Equals("RESOLVED")
                 || a.RequestStatus!.Equals("COMPLETED"))).Select(a => new RequestResponse
                 {
@@ -135,6 +136,7 @@ namespace UPOD.SERVICES.Services
                 && (a.RequestStatus!.Equals("WARNING")
                 || a.RequestStatus!.Equals("PREPARING")
                 || a.RequestStatus!.Equals("RESOLVING")
+                || a.RequestStatus!.Equals("CANCELED")
                 || a.RequestStatus!.Equals("RESOLVED")
                 || a.RequestStatus!.Equals("COMPLETED"))
                 && (a.RequestName!.Contains(value.search!)
@@ -558,6 +560,7 @@ namespace UPOD.SERVICES.Services
             || a.RequestStatus!.Equals("PREPARING")
             || a.RequestStatus!.Equals("RESOLVING")
             || a.RequestStatus!.Equals("RESOLVED")
+            || a.RequestStatus!.Equals("CANCELED")
             || a.RequestStatus!.Equals("COMPLETED"))).ToListAsync();
             var requests = new List<RequestResponse>();
             if (value.search == null && value.status == null)
@@ -567,11 +570,13 @@ namespace UPOD.SERVICES.Services
                 || a.RequestStatus!.Equals("PREPARING")
                 || a.RequestStatus!.Equals("RESOLVING")
                 || a.RequestStatus!.Equals("RESOLVED")
+                || a.RequestStatus!.Equals("CANCELED")
                 || a.RequestStatus!.Equals("COMPLETED"))).ToListAsync();
                 requests = await _context.Requests.Where(a => a.IsDelete == false && a.CurrentTechnicianId.Equals(id)
                 && (a.RequestStatus!.Equals("WARNING")
                 || a.RequestStatus!.Equals("PREPARING")
                 || a.RequestStatus!.Equals("RESOLVING")
+                || a.RequestStatus!.Equals("CANCELED")
                 || a.RequestStatus!.Equals("RESOLVED")
                 || a.RequestStatus!.Equals("COMPLETED"))).Select(a => new RequestResponse
                 {
@@ -648,6 +653,7 @@ namespace UPOD.SERVICES.Services
                 || a.RequestStatus!.Equals("PREPARING")
                 || a.RequestStatus!.Equals("RESOLVING")
                 || a.RequestStatus!.Equals("RESOLVED")
+                || a.RequestStatus!.Equals("CANCELED")
                 || a.RequestStatus!.Equals("COMPLETED"))
                 && (a.RequestName!.Contains(value.search!)
                 || a.Code!.Contains(value.search!)
@@ -663,6 +669,7 @@ namespace UPOD.SERVICES.Services
                 || a.RequestStatus!.Equals("PREPARING")
                 || a.RequestStatus!.Equals("RESOLVING")
                 || a.RequestStatus!.Equals("RESOLVED")
+                || a.RequestStatus!.Equals("CANCELED")
                 || a.RequestStatus!.Equals("COMPLETED"))
                 && (a.RequestName!.Contains(value.search!)
                 || a.Code!.Contains(value.search!)
@@ -736,6 +743,7 @@ namespace UPOD.SERVICES.Services
             && (a.RequestStatus!.Equals("WARNING")
             || a.RequestStatus!.Equals("PREPARING")
             || a.RequestStatus!.Equals("RESOLVING")
+            || a.RequestStatus!.Equals("CANCELED")
             || a.RequestStatus!.Equals("RESOLVED")
             || a.RequestStatus!.Equals("COMPLETED"))).ToListAsync();
             var requests = new List<RequestResponse>();
@@ -748,6 +756,7 @@ namespace UPOD.SERVICES.Services
                 || a.RequestStatus!.Equals("PREPARING")
                 || a.RequestStatus!.Equals("RESOLVING")
                 || a.RequestStatus!.Equals("RESOLVED")
+                || a.RequestStatus!.Equals("CANCELED")
                 || a.RequestStatus!.Equals("COMPLETED"))).ToListAsync();
                 requests = await _context.Requests.Where(a => a.IsDelete == false
                 && a.CurrentTechnicianId.Equals(tech_id)
@@ -756,6 +765,7 @@ namespace UPOD.SERVICES.Services
                 || a.RequestStatus!.Equals("PREPARING")
                 || a.RequestStatus!.Equals("RESOLVING")
                 || a.RequestStatus!.Equals("RESOLVED")
+                || a.RequestStatus!.Equals("CANCELED")
                 || a.RequestStatus!.Equals("COMPLETED"))).Select(a => new RequestResponse
                 {
                     id = a.Id,
@@ -831,6 +841,7 @@ namespace UPOD.SERVICES.Services
                 && (a.RequestStatus!.Equals("WARNING")
                 || a.RequestStatus!.Equals("PREPARING")
                 || a.RequestStatus!.Equals("RESOLVING")
+                || a.RequestStatus!.Equals("CANCELED")
                 || a.RequestStatus!.Equals("RESOLVED")
                 || a.RequestStatus!.Equals("COMPLETED"))
                 && (a.RequestName!.Contains(value.search!)
@@ -847,6 +858,7 @@ namespace UPOD.SERVICES.Services
                 && (a.RequestStatus!.Equals("WARNING")
                 || a.RequestStatus!.Equals("PREPARING")
                 || a.RequestStatus!.Equals("RESOLVING")
+                || a.RequestStatus!.Equals("CANCELED")
                 || a.RequestStatus!.Equals("RESOLVED")
                 || a.RequestStatus!.Equals("COMPLETED"))
                 && (a.RequestName!.Contains(value.search!)
